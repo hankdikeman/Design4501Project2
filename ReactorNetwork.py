@@ -1,3 +1,9 @@
+"""
+Network class to contain all reaction network components and iterate over
+components to find the steady state solution of system
+"""
+
+
 class Network:
     def __init__(self):
         self.component_set = {}
