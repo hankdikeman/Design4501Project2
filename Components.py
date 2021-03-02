@@ -9,7 +9,6 @@ import numpy as np
 # baseclass for component
 class Component:
     next_inlets = {}
-    next_outlets = {}
 
     def __init__(self, inlets, outlets):
         self.inlets = {}
@@ -27,26 +26,19 @@ class Component:
     def get_outlets(self):
         return self.outlets
 
-    def set_next_streams(self, inlets, outlets):
+    def set_next_streams(self, inlets):
         # add all inlet streams to inlet stream dict
         for comp, inflow in inlets:
             self.next_inlets[comp] = inflow
-        # add all outlet streams to outlet stream dict
-        for comp, outflow in outlets:
-            self.next_outlets[comp] = outflow
 
     def check_solution(self):
         # check all inlet flows to be the same within tolerance
         for inflow in self.inlets.keys():
             previous = self.inlets[inflow]
-            iterated = self.inlets[inflow]
+            iterated = self.next_inlets[inflow]
             if np.linalg.norm(previous - iterated) > 1E-9:
                 return False
-        for inflow in self.inlets.keys():
-            previous = self.inlets[inflow]
-            iterated = self.inlets[inflow]
-            if np.linalg.norm(previous - iterated) > 1E-9:
-                return False
+        return True
 
 
 class HeatExchanger(Component):
