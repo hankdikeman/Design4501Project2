@@ -90,57 +90,37 @@ class Absorber(Component):
         self.key_recovery = key_rec
         # Need to identify and set key compenent
 
-        # Values tracked for any instance of an absorber
-        self.v_Np1 = np.array(len(inlets) - 1)  # vapor flowrates in
-        self.P0 = np.zeros(len(inlets))        # vapor pressures (in mmHg)
-        # relative volatilities w.r.t. to the key component
-        self.alpha = np.zeros(len(inlets))
-        self.AF = np.zeros(len(inlets))        # effective absorption factors
-        self.beta_N = np.zeros(len(inlets))    # beta_N values
-        self.beta_Nm1 = np.zeros(len(inlets))  # beta_N-1 values
-        # solvent inlet flowrates (in mol/s)
-        self.l_0 = np.zeros(len(inlets))
-        # solvent outlet flowrates (in mol/s)
-        self.l_N = np.zeros(len(inlets))
-        # gas outlet flowrates (in mol/s)
-        self.v_1 = np.zeros(len(inlets))
-        self.x_0 = np.zeros(len(inlets))       # solvent inlet mole fractions
-        self.x_N = np.zeros(len(inlets))       # solvent outlet mole fractions
-        self.y_1 = np.zeros(len(inlets))
         # Need to have a component class where inlets have antionne coef., absorption coeff
         # run super constructor
         super(Absorber, self).__init__(inlets, outlets)
 
         def get_outlet():
-            check = 1
-            while (check == 1):
+            while (True):
                 # Vapor pressure
                 # Focus on setting this with while loop
-                self.P0 = np.exp(A - B / (T_0 + C))
+                P0 = np.exp(A - B / (T_0 + C))
 
                 # Solvent flowrate
-                self.AF[n] = 1.4  # Key component effective absorption factor
+                AF[n] = 1.4  # Key component effective absorption factor
                 # Also need to set air to zero (dont know what component)
-                l_0[2] = self.AF[n] * \
-                    sum(self.v_Np1) * self.P0[n] / self.pressure
-                # Number of stages:
-                N = np.log((self.l_0[n] + (self.key_recovery - self.AF[n]) * self.v_Np1[n]) / (
-                    self.l_0[n] - self.AF[n] * (1 - self.key_recovery) * self.v_Np1[n])) / np.log(self.AF[n])
+                l_0 = np.zeros(len(inlets))
+                l_0[2] = AF[n] * sum(v_Np1) * P0[n] / self.pressure #solvent
+                # Number of stages (deleted l_0[n]):
+                N = np.log(((key_recovery - AF[n]) * v_Np1[n]) / (AF[n] * (1 - key_recovery) * v_Np1[n])) / np.log(AF[n])
                 # Alpha
-                self.alpha = self.P0 / self.P0[n]
-                # Need someway to set absorption factors of remaining species (so minus key and air)
+                alpha = P0 / P0[n]
+                AF[2] = AF[n]/alpha[2] # Need someway to set absorption factors of remaining species (so minus key and air)
                 # Beta values
-                self.beta_N = (1 - self.AF**(N + 1)) / (1 - self.AF)
-                self.beta_Nm1 = (1 - self.AF**N) / (1 - self.AF)
+                beta_N = (1 - AF**(N + 1)) / (1 - AF)
+                beta_Nm1 = (1 - AF**N) / (1 - AF)
                 # Mass balance
-                self.v_1 = 1 / self.beta_N * self.v_Np1 + \
-                    self.beta_Nm1 / self.beta_N * self.l_0
-                self.l_N = self.v_Np1 + self.l_0 - self.v_1
+                v_1 = 1 / beta_N * v_Np1 + beta_Nm1 / beta_N * l_0
+                l_N = v_Np1 + l_0 - v_1
 
-                self.y_1 = self.v_1 / sum(self.v_1)
-                self.x_N = self.l_N / sum(self.l_N)
+                y_1 = v_1 / sum(v_1)
+                x_N = l_N / sum(l_N)
                 # Temperature of solvent out (bubble point)
-                alpha_avg = sum(self.x_N * self.alpha)
+                alpha_avg = sum(x_N * alpha)
                 # Need to fix antionne coeff.
                 T_N = B[n] / (A[n] - np.log(self.pressure / alpha_avg)) - C[n]
                 # Check top vs bottom solvent temp
@@ -153,4 +133,4 @@ class Absorber(Component):
                     # Check Edmister equation note sure which AF
                     AF_new = (AF_N_wat * (1 + AF[2]) + 0.25)**0.5 - 0.5
                 else:
-                    check == 0
+                    break
