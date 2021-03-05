@@ -83,11 +83,11 @@ class DistillationColumn(Component):
 
 
 class Absorber(Component):
-    def __init__(self, solvent_t_in, pressure, key_rec, inlets, outlets):
+    def __init__(self, solvent_t_in, pressure, key_recov, key_index, inlets, outlets):
         self.solvent_temp_in = solvent_t_in
         self.pressure = pressure
         self.solvent_temp_out = None
-        self.key_recovery = key_rec
+        self.key_recovery = key_recov
         # Need to identify and set key compenent
 
         # Need to have a component class where inlets have antionne coef., absorption coeff
@@ -95,21 +95,24 @@ class Absorber(Component):
         super(Absorber, self).__init__(inlets, outlets)
 
         def get_outlet():
+            # Variables to track
+            l_0 = np.zeros(len(inlets))
+            AF = np.zeros(len(inlets))
+            n = key_index
             while (True):
                 # Vapor pressure
-                # Focus on setting this with while loop
-                P0 = np.exp(A - B / (T_0 + C))
-
+                P0 = getSatP(self.solvent_temp_in)
                 # Solvent flowrate
                 AF[n] = 1.4  # Key component effective absorption factor
                 # Also need to set air to zero (dont know what component)
-                l_0 = np.zeros(len(inlets))
                 l_0[2] = AF[n] * sum(v_Np1) * P0[n] / self.pressure #solvent
                 # Number of stages (deleted l_0[n]):
-                N = np.log(((key_recovery - AF[n]) * v_Np1[n]) / (AF[n] * (1 - key_recovery) * v_Np1[n])) / np.log(AF[n])
+                N = np.log(((self.key_recovery - AF[n]) * v_Np1[n]) / (AF[n] * (1 - self.key_recovery) * v_Np1[n])) / np.log(AF[n])
                 # Alpha
                 alpha = P0 / P0[n]
-                AF[2] = AF[n]/alpha[2] # Need someway to set absorption factors of remaining species (so minus key and air)
+                # Check to see if AF of solvent has been adjusted at the bottom yet
+                if (AF[2] == 0):
+                    AF[2] = AF[n]/alpha[2] # Need someway to set absorption factors of remaining species (so minus key and air)
                 # Beta values
                 beta_N = (1 - AF**(N + 1)) / (1 - AF)
                 beta_Nm1 = (1 - AF**N) / (1 - AF)
@@ -124,13 +127,13 @@ class Absorber(Component):
                 # Need to fix antionne coeff.
                 T_N = B[n] / (A[n] - np.log(self.pressure / alpha_avg)) - C[n]
                 # Check top vs bottom solvent temp
-                if (abs(T_0 - T_N) > 100):
+                if (abs(self.solvent_temp_in - T_N) > 100):
                     # Absortion factors with bottom temp
                     P0_N = np.exp(A - B / (T_N + C))
                     alpha_N_wat = P0_N[2] / P0_N[n]
                     AF_N_wat = AF[n] / alpha_N_wat
-                    # Update absorption factors
-                    # Check Edmister equation note sure which AF
-                    AF_new = (AF_N_wat * (1 + AF[2]) + 0.25)**0.5 - 0.5
+                    # Update absorption factors (Edmister equations)
+                    AF[2] = (AF_N_wat * (1 + AF[2]) + 0.25)**0.5 - 0.5
                 else:
                     break
+            return l_N # The liquid component flowrates Solvent (water), FORM and MeOH
