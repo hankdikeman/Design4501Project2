@@ -73,14 +73,48 @@ class Reactor(Component):
 
 
 class DistillationColumn(Component):
-    def __init__(self, temperature, pressure, recov, inlets, outlets):
-        self.temperature = temperature
+    def __init__(self, temp_in, pressure, recov, inlets, outlets):
+        self.temperature_feed = temp_in
         self.pressure = pressure
         self.xi_hk, ind_hk = recov['HK']
         self.xi_lk, ind_lk = recov['LK']
+        self.temperature_bottom
+        self.temperature_top
+        self.rel_volatility
         # run super constructor
         super(DistillationColumn, self).__init__(inlets, outlets)
 
+        def get_outlet():
+            # Vapor pressure
+            P0 = getSatP(self.solvent_temp_in)
+            # Alpha calcs wrt to HK
+            self.rel_volatility = Psat/Psat[self.ind_hk]
+            # Compute minimum number of trays
+            Nmin = np.log(xi[self.ind_lk]*(1-xi[self.ind_hk])/((1-xi[self.ind_lk])*xi[self.ind_hk]))/np.log(self.rel_volatility[self.ind_lk])
+            # Compute split fractions of all components
+            xi = np.power(self.rel_volatility,Nmin)*xi[self.ind_hk]/(1+(np.power(self.rel_volatility,Nmin)-1)*xi[self.ind_hk])
+            # Compute flow rates (distillate, bottom)
+            d = xi*f
+            b = (1-xi)*f
+            return (d, b) # Not sure on format of return
+
+        # Calculate key temperatures
+        def calc_bot_temp(bottoms):
+            if (self.rel_volatility): # Check to see if get_outlets() has been ran (requisite to have rel_volatility)
+                # Compute mole fraction
+                x_B = bottoms/sum(bottoms)
+                self.temperature_bottom = B[self.ind_hk]/(A[self.ind_hk]-np.log10((self.pressure/101)*np.sum(x_B/self.rel_volatility)))-C[self.ind_hk] # Check on pressure factor ???
+                return True
+            else:
+                return False
+        def calc_top_temp(tops):
+            if (self.rel_volatility):
+                # Compute mole fraction
+                x_D = tops/sum(tops)
+                self.temperature_top = B[self.ind_lk]/(A[self.ind_lk]-np.log10((self.pressure/101)*self.rel_volatility[self.ind_lk]/np.sum(x_D*self.rel_volatility)))-C[self.ind_lk]
+                return True
+            else:
+                return False
 
 class Absorber(Component):
     def __init__(self, solvent_t_in, pressure, key_recov, key_index, inlets, outlets):
