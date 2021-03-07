@@ -6,7 +6,7 @@ compositions as a function of inlet compositions
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from thermoutils import get_psat, get_tsat
-
+from scipy.optimize import newton
 
 # baseclass for component
 class Component(metaclass=ABCMeta):
@@ -140,24 +140,27 @@ class FlashTank(Component):
         super(FlashTank, self).__init__(inlets, {**v_out, **l_out})
 
     def calc_outlets(self):
-        alpha = get_psat(temp_guess) / get_psat(temp_guess)[self.ind_key]
+        temp = newton(self.temperature_iteration, 300)
+        alpha = get_psat(temp) / get_psat(temp)[self.ind_key]
         # Calculate recoveries
-        xi = np.divide(self.alpha*self.xi_key 1+(self.alpha-1)*self.xi_key)
+        xi = np.divide(alpha*self.xi_key, 1+(alpha-1)*self.xi_key)
         # Mass Balance
         self.outlets[self.vapor_out] = v = xi*list(self.inlets.values())[0]
         self.outlets[self.liquid_out] = l = (1-xi)*list(self.inlets.values())[0]
+        print("vout", self.outlets[self.vapor_out])
+        print("lout", self.outlets[self.liquid_out])
         return self.outlets
 
     def temperature_iteration(self, temp_guess):
         alpha = get_psat(temp_guess) / get_psat(temp_guess)[self.ind_key]
         # Calculate recoveries
-        xi = np.divide(self.alpha*self.xi_key 1+(self.alpha-1)*self.xi_key)
+        xi = np.divide(alpha*self.xi_key, 1+(alpha-1)*self.xi_key)
         # Mass Balance
         self.outlets[self.vapor_out] = v = xi*list(self.inlets.values())[0]
         self.outlets[self.liquid_out] = l = (1-xi)*list(self.inlets.values())[0]
         x = l/sum(l)
         # Bubble point
-        temp_comp = get_tsat(self.pressure*alpha[bub_key]/np.sum(alpha*x))
+        temp_comp = (get_tsat(self.pressure*alpha[self.bub_key]/np.sum(alpha*x)))[self.bub_key]
         return temp_guess-temp_comp
 
 
@@ -268,11 +271,15 @@ class Absorber(Component):
 
 if __name__ == "__main__":
     print(__doc__)
-    dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+    dict1 = {'mu1': np.array([1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0])}
     dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
     dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
     dict4 = {'mu4': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
     absorber1 = Absorber(300, 2, 0.97, 5, 3, dict1, dict2, dict3, dict4)
     recov = {'LK': (0.99, 1), 'HK': (0.001, 2)}
     distillationColumn = DistillationColumn(300, 2, recov, dict1, dict2, dict3)
-    print(distillationColumn.calc_outlets())
+    # print(distillationColumn.calc_outlets())
+
+    recov1 = {'Key': (0.99, 4)}
+    flash = FlashTank(760, recov1, 3, dict1, dict2, dict3)
+    print(flash.calc_outlets())
