@@ -51,6 +51,33 @@ class Removal(Component):
         return {}
 
 
+class Mixer(Component):
+    def __init__(self, inlets, outlets):
+        super(Mixer, self).__init__(inlets, outlets)
+
+    def calc_outlets(self):
+        mixed = np.zeros(len(list(self.inlets.values())[0]))
+        for keys in self.inlets.keys():
+            mixed += self.inlets[keys]
+        self.outlets[next(iter(self.outlets))] = mixed
+
+
+class Splitter(Component):
+    def __init__(self, inlets, outlets, split_fraction, split_stream_name):
+        self.split = split_fraction
+        self.splitstream = split_stream_name
+        super(Splitter, self).__init__(inlets, outlets)
+
+    def calc_outlets(self):
+        for stream in self.outlets.keys():
+            if stream == self.splitstream:
+                self.outlets[stream] = list(self.inlets.values())[0] \
+                    * self.split
+            else:
+                self.outlets[stream] = list(self.inlets.values())[0] \
+                    * (1 - self.split)
+
+
 class HeatExchanger(Component):
     def __init__(self, inlettemp, outlettemp, inlets, outlets):
         self.in_temp = inlettemp

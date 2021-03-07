@@ -4,6 +4,7 @@ components to find the steady state solution of system
 """
 import numpy as np
 from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber
+from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
 
 class Network:
@@ -61,9 +62,6 @@ class Network:
 # unit tests for reaction network class
 if __name__ == "__main__":
     print(__doc__)
-
-    def FormReactor(inputs, temp, pressure):
-        return inputs * np.exp(temp * pressure)
     # generate network class
     net = Network()
     # generate several components of different classes, add each to network
