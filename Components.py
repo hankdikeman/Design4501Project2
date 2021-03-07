@@ -9,6 +9,8 @@ from thermoutils import get_psat, get_tsat
 from scipy.optimize import newton
 
 # baseclass for component
+
+
 class Component(metaclass=ABCMeta):
     next_inlets = {}
 
@@ -129,6 +131,7 @@ class Reactor(Component):
             list(self.inlets.values)[0], self.pressure, self.temperature)
         return self.outlets
 
+
 class FlashTank(Component):
     def __init__(self, pressure, recov, bub_key, inlets, v_out, l_out):
         self.pressure = pressure
@@ -143,10 +146,11 @@ class FlashTank(Component):
         temp = newton(self.temperature_iteration, 300)
         alpha = get_psat(temp) / get_psat(temp)[self.ind_key]
         # Calculate recoveries
-        xi = np.divide(alpha*self.xi_key, 1+(alpha-1)*self.xi_key)
+        xi = np.divide(alpha * self.xi_key, 1 + (alpha - 1) * self.xi_key)
         # Mass Balance
-        self.outlets[self.vapor_out] = v = xi*list(self.inlets.values())[0]
-        self.outlets[self.liquid_out] = l = (1-xi)*list(self.inlets.values())[0]
+        self.outlets[self.vapor_out] = v = xi * list(self.inlets.values())[0]
+        self.outlets[self.liquid_out] = l = (
+            1 - xi) * list(self.inlets.values())[0]
         print("vout", self.outlets[self.vapor_out])
         print("lout", self.outlets[self.liquid_out])
         return self.outlets
@@ -154,14 +158,16 @@ class FlashTank(Component):
     def temperature_iteration(self, temp_guess):
         alpha = get_psat(temp_guess) / get_psat(temp_guess)[self.ind_key]
         # Calculate recoveries
-        xi = np.divide(alpha*self.xi_key, 1+(alpha-1)*self.xi_key)
+        xi = np.divide(alpha * self.xi_key, 1 + (alpha - 1) * self.xi_key)
         # Mass Balance
-        self.outlets[self.vapor_out] = v = xi*list(self.inlets.values())[0]
-        self.outlets[self.liquid_out] = l = (1-xi)*list(self.inlets.values())[0]
-        x = l/sum(l)
+        self.outlets[self.vapor_out] = v = xi * list(self.inlets.values())[0]
+        self.outlets[self.liquid_out] = l = (
+            1 - xi) * list(self.inlets.values())[0]
+        x = l / sum(l)
         # Bubble point
-        temp_comp = (get_tsat(self.pressure*alpha[self.bub_key]/np.sum(alpha*x)))[self.bub_key]
-        return temp_guess-temp_comp
+        temp_comp = (get_tsat(self.pressure *
+                              alpha[self.bub_key] / np.sum(alpha * x)))[self.bub_key]
+        return temp_guess - temp_comp
 
 
 class DistillationColumn(Component):
@@ -263,11 +269,13 @@ class Absorber(Component):
                 AF[self.solvent_index] = (
                     AF_N_wat * (1 + AF[self.solvent_index]) + 0.25)**0.5 - 0.5
             else:
+                self.inlets[self.liquid_in] = l_0
                 self.outlets[self.vapor_out] = v_1
                 self.outlets[self.liquid_out] = l_N
                 break
         # The liquid component flowrates Solvent (water), FORM and MeOH
         return self.outlets
+
 
 if __name__ == "__main__":
     print(__doc__)
