@@ -35,8 +35,6 @@ class Component(metaclass=ABCMeta):
         return True
 
 
-<<<<<<< HEAD
-=======
 class Feed(Component):
     def __init__(self, outlets):
         super(Feed, self).__init__({}, outlets)
@@ -80,7 +78,6 @@ class Splitter(Component):
                     * (1 - self.split)
 
 
->>>>>>> 145f7efd971d84e8782ca509aae79cb7d41677cf
 class HeatExchanger(Component):
     def __init__(self, inlettemp, outlettemp, inlets, outlets):
         self.in_temp = inlettemp
@@ -271,17 +268,10 @@ class Absorber(Component):
 
 if __name__ == "__main__":
     print(__doc__)
-<<<<<<< HEAD
-    dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
-    dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
-    dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]) }
-    dict4 = {'mu4': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
-=======
     dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
     dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
     dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
     dict4 = {'mu4': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
->>>>>>> 145f7efd971d84e8782ca509aae79cb7d41677cf
     absorber1 = Absorber(300, 2, 0.97, 5, 3, dict1, dict2, dict3, dict4)
     recov = {'LK': (0.99, 1), 'HK': (0.001, 2)}
     distillationColumn = DistillationColumn(300, 2, recov, dict1, dict2, dict3)
