@@ -98,31 +98,31 @@ class DistillationColumn(Component):
         # run super constructor
         super(DistillationColumn, self).__init__(inlets, {**v_out, **l_out})
 
-        def calc_outlets(self):
-            # Compute minimum number of trays
-            Nmin = np.log(self.xi_lk * (1 - self.xi_hk) / ((1 - self.xi_lk)
-                                                           * self.xi_hk)) / np.log(self.alpha[self.ind_lk])
-            # Compute split fractions of all components
-            xi = np.power(self.alpha, Nmin) * self.xi_hk / (
-                1 + (np.power(self.alpha, Nmin) - 1) * self.xi_hk)
-            # compute distillate and vapor flowrates
-            self.outlets[self.vapor_out] = d = xi * self.inlets.values()[0]
-            self.outlets[self.liquid_out] = b = (
-                1 - xi) * self.inlets.values()[0]
-            return self.outlets
+    def calc_outlets(self):
+        # Compute minimum number of trays
+        Nmin = np.log(self.xi_lk * (1 - self.xi_hk) / ((1 - self.xi_lk)
+                                                       * self.xi_hk)) / np.log(self.alpha[self.ind_lk])
+        # Compute split fractions of all components
+        xi = np.power(self.alpha, Nmin) * self.xi_hk / (
+            1 + (np.power(self.alpha, Nmin) - 1) * self.xi_hk)
+        # compute distillate and vapor flowrates
+        self.outlets[self.vapor_out] = d = xi * self.inlets.values()[0]
+        self.outlets[self.liquid_out] = b = (
+            1 - xi) * self.inlets.values()[0]
+        return self.outlets
 
-        # Calculate key temperatures
-        def calc_bot_temp(self):
-            # Compute mole fraction
-            x_B = self.outlets[self.liquid_out] / \
-                np.sum(self.outlets[self.liquid_out])
-            return get_tsat((self.pressure) * np.sum(x_B / self.alpha))
+    # Calculate key temperatures
+    def calc_bot_temp(self):
+        # Compute mole fraction
+        x_B = self.outlets[self.liquid_out] / \
+            np.sum(self.outlets[self.liquid_out])
+        return get_tsat((self.pressure) * np.sum(x_B / self.alpha))
 
-        def calc_top_temp(self):
-            # Compute mole fraction
-            x_D = self.outlets[self.vapor_out] / \
-                np.sum(self.outlets[self.vapor_out])
-            return get_tsat((self.pressure) * self.alpha[self.ind_lk] / np.sum(x_D * self.alpha))
+    def calc_top_temp(self):
+        # Compute mole fraction
+        x_D = self.outlets[self.vapor_out] / \
+            np.sum(self.outlets[self.vapor_out])
+        return get_tsat((self.pressure) * self.alpha[self.ind_lk] / np.sum(x_D * self.alpha))
 
 
 class Absorber(Component):
@@ -168,7 +168,6 @@ class Absorber(Component):
             # Mass balance
             v_1 = 1 / beta_N * v_Np1 + beta_Nm1 / beta_N * l_0
             l_N = v_Np1 + l_0 - v_1
-
             x_N = l_N / sum(l_N)
             # Temperature of solvent out (bubble point)
             alpha_avg = sum(x_N * alpha)
@@ -189,3 +188,10 @@ class Absorber(Component):
                 break
         # The liquid component flowrates Solvent (water), FORM and MeOH
         return self.outlets
+
+if __name__ == "__main__":
+    print(__doc__)
+    dict = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu4': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
+    absorber1 = Absorber(300, 2, 0.97, 5, 3, dict['mu1'], dict['mu2'], dict['mu3'], dict['mu4'])
+    recov = {'LK':0.99, 'HK': 0.001}
+    distillationColumn = DistillationColumn(300, 2, recov, dict['mu1'], dict['mu2'], dict['mu3'])
