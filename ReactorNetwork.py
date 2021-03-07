@@ -3,6 +3,7 @@ Network class to contain all reaction network components and iterate over
 components to find the steady state solution of system
 """
 import numpy as np
+import pprint
 from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber, Feed, Removal, ProductRemoval, Mixer, Splitter, FlashTank
 from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
@@ -37,13 +38,16 @@ class Network:
         # use intersection of dictionary keysets to avoid key error
         # feed and outlets will not be iterated in this set-up (might need to be changed)
         iterable_streams = current_inlets.keys() & next_inlets.keys()
-        # loop through inlet streams and iterate values
+        # loop through components
         for component in self.component_set.keys():
-            if not component.isfixed():
-                for inlets in component.get_inlets():
-                    for inflow in (inlets.keys() & iterable_streams):
-                        inlets[inflow] = inlets[inflow] - self.LEARNING_PARAM * \
-                            (next_inlets[inflow] - inlets[inflow])
+            # check if component is fixed
+            if not self.component_set[component].is_fixed():
+                # get inlet streams of component
+                inlets = self.component_set[component].get_inlets()
+                pprint.pprint(inlets)
+                for inflow in (inlets.keys() & iterable_streams):
+                    inlets[inflow] = inlets[inflow] - self.LEARNING_PARAM * \
+                        (next_inlets[inflow] - inlets[inflow])
         return next_inlets
 
     def equilibrate_network(self):
@@ -56,7 +60,8 @@ class Network:
             # check if all components are at steady state solution
             self.equilibrated = True
             for component in self.component_set:
-                self.equilibrated &= component.check_solution(next_inlets)
+                self.equilibrated &= self.component_set[component].check_solution(
+                    next_inlets)
             print(self.equilibrated)
             n_iter += 1
 

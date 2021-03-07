@@ -265,7 +265,8 @@ class Absorber(Component):
             # Temperature of solvent out (bubble point)
             alpha_avg = sum(x_N * alpha)
             # Need to fix Antoine coeff.
-            T_N = get_tsat(np.log(self.pressure / alpha_avg))
+            T_N = get_tsat(np.log(self.pressure / alpha_avg)
+                           )[self.solvent_index]
             # Check top vs bottom solvent temp
             if (abs(self.solvent_temp_in - T_N) > 100):
                 # Absortion factors with bottom temp
