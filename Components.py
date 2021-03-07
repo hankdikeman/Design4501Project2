@@ -285,6 +285,10 @@ class Absorber(Component):
         return self.outlets
 
 
+def StreamGen(H2=0, CO2=0, CO=0, H2O=0, MEOH=0, FA=0, N2=0, O2=0, OME1=0, OME2=0, OME3=0, OME4=0, OME5=0, OME6=0):
+    return np.array([H2, CO2, CO, H2O, MEOH, FA, N2, O2, OME1, OME2, OME3, OME4, OME5, OME6])
+
+
 if __name__ == "__main__":
     print(__doc__)
     dict1 = {'mu1': np.array([1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0])}

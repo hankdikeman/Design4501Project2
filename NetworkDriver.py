@@ -4,14 +4,14 @@ production process using the ReactorNetwork object and component objects.
 """
 import numpy as np
 from ReactorNetwork import Network
-from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber, Feed, Removal, ProductRemoval, Mixer, Splitter, FlashTank
+from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber, Feed, Removal, ProductRemoval, Mixer, Splitter, FlashTank, StreamGen
 from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
 if __name__ == "__main__":
     # generate reactor network
     net1 = Network()
     # feed to reactor
-
+    i1inlet = {'i1': St}
     # mixer for recycle and feed
 
     # methanol reactor
