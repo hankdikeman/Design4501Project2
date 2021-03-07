@@ -3,6 +3,7 @@ Network class to contain all reaction network components and iterate over
 components to find the steady state solution of system
 """
 import numpy as np
+from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber
 
 
 class Network:
@@ -14,8 +15,10 @@ class Network:
 
     def add_component(self, name, component):
         # check if the components name is taken, and if so then raise an error
-        if name in self.component_set.keys():
-            raise ValueError("this component name is already taken")
+        if not isinstance(component, Component):
+            raise ValueError('this is not a component type object')
+        elif name in self.component_set.keys():
+            raise ValueError('this component name is already taken')
         else:
             self.component_set[name] = component
 
@@ -49,3 +52,8 @@ class Network:
             self.equilibrated = True
             for component in self.component_set:
                 self.equilibrated &= component.check_solution()
+
+
+# unit tests for reaction network class
+if __name__ == "__main__":
+    net = Network()
