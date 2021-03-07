@@ -35,22 +35,6 @@ class Component(metaclass=ABCMeta):
         return True
 
 
-class Feed(Component):
-    def __init__(self, outlets):
-        super(Feed, self).__init__({}, outlets)
-
-    def calc_outlets(self):
-        return self.outlets
-
-
-class Removal(Component):
-    def __init__(self, inlets):
-        super(Removal, self).__init__(inlets, {})
-
-    def calc_outlets(self):
-        return {}
-
-
 class HeatExchanger(Component):
     def __init__(self, inlettemp, outlettemp, inlets, outlets):
         self.in_temp = inlettemp
@@ -98,6 +82,37 @@ class Reactor(Component):
 
     def calc_outlets(self):
         return 0
+
+class FlashTank(Component):
+    def __init__(self, pressure, recov, bub_key, inlets, v_out, l_out):
+        self.pressure = pressure
+        self.xi_key, self.ind_key = recov['Key']
+        self.vapor_out = list(v_out.keys())[0]
+        self.liquid_out = list(l_out.keys())[0]
+        self.bub_key = bub_key
+        # run super constructor
+        super(FlashTank, self).__init__(inlets, {**v_out, **l_out})
+
+    def calc_outlets(self):
+        alpha = get_psat(temp_guess) / get_psat(temp_guess)[self.ind_key]
+        # Calculate recoveries
+        xi = np.divide(self.alpha*self.xi_key 1+(self.alpha-1)*self.xi_key)
+        # Mass Balance
+        self.outlets[self.vapor_out] = v = xi*list(self.inlets.values())[0]
+        self.outlets[self.liquid_out] = l = (1-xi)*list(self.inlets.values())[0]
+        return self.outlets
+
+    def temperature_iteration(self, temp_guess):
+        alpha = get_psat(temp_guess) / get_psat(temp_guess)[self.ind_key]
+        # Calculate recoveries
+        xi = np.divide(self.alpha*self.xi_key 1+(self.alpha-1)*self.xi_key)
+        # Mass Balance
+        self.outlets[self.vapor_out] = v = xi*list(self.inlets.values())[0]
+        self.outlets[self.liquid_out] = l = (1-xi)*list(self.inlets.values())[0]
+        x = l/sum(l)
+        # Bubble point
+        temp_comp = get_tsat(self.pressure*alpha[bub_key]/np.sum(alpha*x))
+        return temp_guess-temp_comp
 
 
 class DistillationColumn(Component):
@@ -205,18 +220,8 @@ class Absorber(Component):
         # The liquid component flowrates Solvent (water), FORM and MeOH
         return self.outlets
 
-
 if __name__ == "__main__":
     print(__doc__)
-<<<<<<< HEAD
-    dict = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu2': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu3': np.array(
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu4': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
-    absorber1 = Absorber(300, 2, 0.97, 5, 3,
-                         dict['mu1'], dict['mu2'], dict['mu3'], dict['mu4'])
-    recov = {'LK': 0.99, 'HK': 0.001}
-    distillationColumn = DistillationColumn(
-        300, 2, recov, dict['mu1'], dict['mu2'], dict['mu3'])
-=======
     dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
     dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
     dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]) }
@@ -225,4 +230,3 @@ if __name__ == "__main__":
     recov = {'LK':(0.99, 1), 'HK': (0.001, 2)}
     distillationColumn = DistillationColumn(300, 2, recov, dict1, dict2, dict3)
     print(distillationColumn.calc_outlets())
->>>>>>> 1e693c63728cdd9fd2177c621d9feea9028bd854
