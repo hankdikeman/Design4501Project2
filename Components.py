@@ -90,14 +90,17 @@ class Turbine(Component):
 
 # reactor baseclass
 class Reactor(Component):
-    def __init__(self, temperature, pressure, inlets, outlets):
+    def __init__(self, temperature, pressure, inlets, outlets, conv_function):
         self.temperature = temperature
         self.pressure = pressure
+        self.conversion_function = conv_function
         # run super constructor
         super(Reactor, self).__init__(inlets, outlets)
 
     def calc_outlets(self):
-        return 0
+        list(self.outlets.values())[0] = self.conversion_function(
+            list(self.inlets.values)[0], self.pressure, self.temperature)
+        return self.outlets
 
 
 class DistillationColumn(Component):
@@ -208,21 +211,11 @@ class Absorber(Component):
 
 if __name__ == "__main__":
     print(__doc__)
-<<<<<<< HEAD
-    dict = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu2': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu3': np.array(
-        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu4': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
-    absorber1 = Absorber(300, 2, 0.97, 5, 3,
-                         dict['mu1'], dict['mu2'], dict['mu3'], dict['mu4'])
-    recov = {'LK': 0.99, 'HK': 0.001}
-    distillationColumn = DistillationColumn(
-        300, 2, recov, dict['mu1'], dict['mu2'], dict['mu3'])
-=======
-    dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
-    dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
-    dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]) }
-    dict4 = {'mu4': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
+    dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+    dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+    dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+    dict4 = {'mu4': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
     absorber1 = Absorber(300, 2, 0.97, 5, 3, dict1, dict2, dict3, dict4)
-    recov = {'LK':(0.99, 1), 'HK': (0.001, 2)}
+    recov = {'LK': (0.99, 1), 'HK': (0.001, 2)}
     distillationColumn = DistillationColumn(300, 2, recov, dict1, dict2, dict3)
     print(distillationColumn.calc_outlets())
->>>>>>> 1e693c63728cdd9fd2177c621d9feea9028bd854
