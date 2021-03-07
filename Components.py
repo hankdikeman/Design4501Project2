@@ -91,33 +91,40 @@ class DistillationColumn(Component):
             # Vapor pressure
             P0 = getSatP(self.solvent_temp_in)
             # Alpha calcs wrt to HK
-            self.rel_volatility = Psat/Psat[self.ind_hk]
+            self.rel_volatility = Psat / Psat[self.ind_hk]
             # Compute minimum number of trays
-            Nmin = np.log(xi[self.ind_lk]*(1-xi[self.ind_hk])/((1-xi[self.ind_lk])*xi[self.ind_hk]))/np.log(self.rel_volatility[self.ind_lk])
+            Nmin = np.log(xi[self.ind_lk] * (1 - xi[self.ind_hk]) / ((1 - xi[self.ind_lk])
+                                                                     * xi[self.ind_hk])) / np.log(self.rel_volatility[self.ind_lk])
             # Compute split fractions of all components
-            xi = np.power(self.rel_volatility,Nmin)*xi[self.ind_hk]/(1+(np.power(self.rel_volatility,Nmin)-1)*xi[self.ind_hk])
+            xi = np.power(self.rel_volatility, Nmin) * xi[self.ind_hk] / (
+                1 + (np.power(self.rel_volatility, Nmin) - 1) * xi[self.ind_hk])
             # Compute flow rates (distillate, bottom)
-            d = xi*f
-            b = (1-xi)*f
-            return (d, b) # Not sure on format of return
+            d = xi * f
+            b = (1 - xi) * f
+            return (d, b)  # Not sure on format of return
 
         # Calculate key temperatures
         def calc_bot_temp(bottoms):
-            if (self.rel_volatility): # Check to see if get_outlets() has been ran (requisite to have rel_volatility)
+            # Check to see if get_outlets() has been ran (requisite to have rel_volatility)
+            if (self.rel_volatility):
                 # Compute mole fraction
-                x_B = bottoms/sum(bottoms)
-                self.temperature_bottom = B[self.ind_hk]/(A[self.ind_hk]-np.log10((self.pressure/101)*np.sum(x_B/self.rel_volatility)))-C[self.ind_hk] # Check on pressure factor ???
+                x_B = bottoms / sum(bottoms)
+                self.temperature_bottom = B[self.ind_hk] / (A[self.ind_hk] - np.log10((self.pressure / 101) * np.sum(
+                    x_B / self.rel_volatility))) - C[self.ind_hk]  # Check on pressure factor ???
                 return True
             else:
                 return False
+
         def calc_top_temp(tops):
             if (self.rel_volatility):
                 # Compute mole fraction
-                x_D = tops/sum(tops)
-                self.temperature_top = B[self.ind_lk]/(A[self.ind_lk]-np.log10((self.pressure/101)*self.rel_volatility[self.ind_lk]/np.sum(x_D*self.rel_volatility)))-C[self.ind_lk]
+                x_D = tops / sum(tops)
+                self.temperature_top = B[self.ind_lk] / (A[self.ind_lk] - np.log10(
+                    (self.pressure / 101) * self.rel_volatility[self.ind_lk] / np.sum(x_D * self.rel_volatility))) - C[self.ind_lk]
                 return True
             else:
                 return False
+
 
 class Absorber(Component):
     def __init__(self, solvent_t_in, pressure, key_recov, key_index, inlets, outlets):
@@ -142,14 +149,16 @@ class Absorber(Component):
                 # Solvent flowrate
                 AF[n] = 1.4  # Key component effective absorption factor
                 # Also need to set air to zero (dont know what component)
-                l_0[2] = AF[n] * sum(v_Np1) * P0[n] / self.pressure #solvent
+                l_0[2] = AF[n] * sum(v_Np1) * P0[n] / self.pressure  # solvent
                 # Number of stages (deleted l_0[n]):
-                N = np.log(((self.key_recovery - AF[n]) * v_Np1[n]) / (AF[n] * (1 - self.key_recovery) * v_Np1[n])) / np.log(AF[n])
+                N = np.log(((self.key_recovery - AF[n]) * v_Np1[n]) / (
+                    AF[n] * (1 - self.key_recovery) * v_Np1[n])) / np.log(AF[n])
                 # Alpha
                 alpha = P0 / P0[n]
                 # Check to see if AF of solvent has been adjusted at the bottom yet
                 if (AF[2] == 0):
-                    AF[2] = AF[n]/alpha[2] # Need someway to set absorption factors of remaining species (so minus key and air)
+                    # Need someway to set absorption factors of remaining species (so minus key and air)
+                    AF[2] = AF[n] / alpha[2]
                 # Beta values
                 beta_N = (1 - AF**(N + 1)) / (1 - AF)
                 beta_Nm1 = (1 - AF**N) / (1 - AF)
@@ -173,7 +182,5 @@ class Absorber(Component):
                     AF[2] = (AF_N_wat * (1 + AF[2]) + 0.25)**0.5 - 0.5
                 else:
                     break
-<<<<<<< HEAD
-=======
-            return l_N # The liquid component flowrates Solvent (water), FORM and MeOH
->>>>>>> b2f815d536e79751541896e97d8bdc9528aaad74
+            # The liquid component flowrates Solvent (water), FORM and MeOH
+            return l_N
