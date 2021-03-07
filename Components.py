@@ -92,8 +92,8 @@ class DistillationColumn(Component):
         self.xi_lk, self.ind_lk = recov['LK']
         # self.temperature_bottom
         # self.temperature_top
-        self.vapor_out = v_out.keys()[0]
-        self.liquid_out = l_out.keys()[0]
+        self.vapor_out = list(v_out.keys())[0]
+        self.liquid_out = list(l_out.keys())[0]
         self.alpha = get_psat(temp_in) / get_psat(temp_in)[self.ind_hk]
         # run super constructor
         super(DistillationColumn, self).__init__(inlets, {**v_out, **l_out})
@@ -106,9 +106,9 @@ class DistillationColumn(Component):
         xi = np.power(self.alpha, Nmin) * self.xi_hk / (
             1 + (np.power(self.alpha, Nmin) - 1) * self.xi_hk)
         # compute distillate and vapor flowrates
-        self.outlets[self.vapor_out] = d = xi * self.inlets.values()[0]
+        self.outlets[self.vapor_out] = d = xi * list(self.inlets.values())[0]
         self.outlets[self.liquid_out] = b = (
-            1 - xi) * self.inlets.values()[0]
+            1 - xi) * list(self.inlets.values())[0]
         return self.outlets
 
     # Calculate key temperatures
@@ -132,17 +132,17 @@ class Absorber(Component):
         self.key_recovery = key_recovery
         self.key_index = key_index
         self.solvent_index = solvent_index
-        self.vapor_in = v_in.keys()[0]
-        self.vapor_out = v_out.keys()[0]
-        self.liquid_in = l_in.keys()[0]
-        self.liquid_out = l_out.keys()[0]
+        self.vapor_in = list(v_in.keys())[0]
+        self.vapor_out = list(v_out.keys())[0]
+        self.liquid_in = list(l_in.keys())[0]
+        self.liquid_out = list(l_out.keys())[0]
         # run super constructor
         super(Absorber, self).__init__({**v_in, **l_in}, {**v_out, **l_out})
 
     def calc_outlets(self):
         # Variables to track
-        l_0 = np.zeros(len(self.inlets.values()[0]))
-        AF = np.zeros(len(self.inlets.values()[0]))
+        l_0 = np.zeros(len(list(self.inlets.values())[0]))
+        AF = np.zeros(len(list(self.inlets.values())[0]))
         v_Np1 = self.inlets[self.vapor_in]
         n = self.key_index
         while (True):
@@ -191,7 +191,11 @@ class Absorber(Component):
 
 if __name__ == "__main__":
     print(__doc__)
-    dict = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu4': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
-    absorber1 = Absorber(300, 2, 0.97, 5, 3, dict['mu1'], dict['mu2'], dict['mu3'], dict['mu4'])
-    recov = {'LK':0.99, 'HK': 0.001}
-    distillationColumn = DistillationColumn(300, 2, recov, dict['mu1'], dict['mu2'], dict['mu3'])
+    dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
+    dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
+    dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]) }
+    dict4 = {'mu4': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
+    absorber1 = Absorber(300, 2, 0.97, 5, 3, dict1, dict2, dict3, dict4)
+    recov = {'LK':(0.99, 1), 'HK': (0.001, 2)}
+    distillationColumn = DistillationColumn(300, 2, recov, dict1, dict2, dict3)
+    print(distillationColumn.calc_outlets())
