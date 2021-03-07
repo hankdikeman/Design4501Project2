@@ -5,7 +5,7 @@ compositions as a function of inlet compositions
 """
 import numpy as np
 from abc import ABCMeta, abstractmethod
-from thermoutils import _
+import thermoutils
 
 
 # baseclass for component
@@ -51,6 +51,9 @@ class Compressor(Component):
         self.out_temp = out_p
         # run super constructor
         super(Compressor, self).__init__(inlets, outlets)
+
+    def calc_outlets(self):
+        return 0
 
 
 class Turbine(Component):
@@ -111,9 +114,8 @@ class Absorber(Component):
         # run super constructor
         super(Absorber, self).__init__(inlets, outlets)
 
-        def get_outlet():
-            check = 1
-            while (check == 1):
+        def calc_outlets():
+            while (True):
                 # Vapor pressure
                 # Focus on setting this with while loop
                 self.P0 = np.exp(A - B / (T_0 + C))
@@ -153,4 +155,4 @@ class Absorber(Component):
                     # Check Edmister equation note sure which AF
                     AF_new = (AF_N_wat * (1 + AF[2]) + 0.25)**0.5 - 0.5
                 else:
-                    check == 0
+                    break
