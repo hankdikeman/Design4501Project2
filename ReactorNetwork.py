@@ -4,6 +4,7 @@ components to find the steady state solution of system
 """
 import numpy as np
 from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber
+from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
 
 class Network:

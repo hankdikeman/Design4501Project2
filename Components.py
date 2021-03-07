@@ -35,6 +35,52 @@ class Component(metaclass=ABCMeta):
         return True
 
 
+<<<<<<< HEAD
+=======
+class Feed(Component):
+    def __init__(self, outlets):
+        super(Feed, self).__init__({}, outlets)
+
+    def calc_outlets(self):
+        return self.outlets
+
+
+class Removal(Component):
+    def __init__(self, inlets):
+        super(Removal, self).__init__(inlets, {})
+
+    def calc_outlets(self):
+        return {}
+
+
+class Mixer(Component):
+    def __init__(self, inlets, outlets):
+        super(Mixer, self).__init__(inlets, outlets)
+
+    def calc_outlets(self):
+        mixed = np.zeros(len(list(self.inlets.values())[0]))
+        for keys in self.inlets.keys():
+            mixed += self.inlets[keys]
+        self.outlets[next(iter(self.outlets))] = mixed
+
+
+class Splitter(Component):
+    def __init__(self, inlets, outlets, split_fraction, split_stream_name):
+        self.split = split_fraction
+        self.splitstream = split_stream_name
+        super(Splitter, self).__init__(inlets, outlets)
+
+    def calc_outlets(self):
+        for stream in self.outlets.keys():
+            if stream == self.splitstream:
+                self.outlets[stream] = list(self.inlets.values())[0] \
+                    * self.split
+            else:
+                self.outlets[stream] = list(self.inlets.values())[0] \
+                    * (1 - self.split)
+
+
+>>>>>>> 145f7efd971d84e8782ca509aae79cb7d41677cf
 class HeatExchanger(Component):
     def __init__(self, inlettemp, outlettemp, inlets, outlets):
         self.in_temp = inlettemp
@@ -74,14 +120,17 @@ class Turbine(Component):
 
 # reactor baseclass
 class Reactor(Component):
-    def __init__(self, temperature, pressure, inlets, outlets):
+    def __init__(self, temperature, pressure, inlets, outlets, conv_function):
         self.temperature = temperature
         self.pressure = pressure
+        self.conversion_function = conv_function
         # run super constructor
         super(Reactor, self).__init__(inlets, outlets)
 
     def calc_outlets(self):
-        return 0
+        list(self.outlets.values())[0] = self.conversion_function(
+            list(self.inlets.values)[0], self.pressure, self.temperature)
+        return self.outlets
 
 class FlashTank(Component):
     def __init__(self, pressure, recov, bub_key, inlets, v_out, l_out):
@@ -222,11 +271,18 @@ class Absorber(Component):
 
 if __name__ == "__main__":
     print(__doc__)
+<<<<<<< HEAD
     dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
     dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
     dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]) }
     dict4 = {'mu4': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
+=======
+    dict1 = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+    dict2 = {'mu2': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+    dict3 = {'mu3': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+    dict4 = {'mu4': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+>>>>>>> 145f7efd971d84e8782ca509aae79cb7d41677cf
     absorber1 = Absorber(300, 2, 0.97, 5, 3, dict1, dict2, dict3, dict4)
-    recov = {'LK':(0.99, 1), 'HK': (0.001, 2)}
+    recov = {'LK': (0.99, 1), 'HK': (0.001, 2)}
     distillationColumn = DistillationColumn(300, 2, recov, dict1, dict2, dict3)
     print(distillationColumn.calc_outlets())
