@@ -12,11 +12,10 @@ from scipy.optimize import newton
 
 
 class Component(metaclass=ABCMeta):
-    next_inlets = {}
-
-    def __init__(self, inlets, outlets):
+    def __init__(self, inlets, outlets, fixed=False):
         self.inlets = inlets
         self.outlets = outlets
+        self.fixed = fixed
 
     # return inlet dictionary
     def get_inlets(self):
@@ -27,11 +26,14 @@ class Component(metaclass=ABCMeta):
     def calc_outlets(self):
         pass
 
-    def check_solution(self):
+    def is_fixed(self):
+        return self.fixed
+
+    def check_solution(self, next_inlets):
         # check all inlet flows to be the same within tolerance
         for inflow in self.inlets.keys():
             previous = self.inlets[inflow]
-            iterated = self.next_inlets[inflow]
+            iterated = next_inlets[inflow]
             if np.linalg.norm(previous - iterated) > 1E-9:
                 return False
         return True
@@ -51,6 +53,11 @@ class Removal(Component):
 
     def calc_outlets(self):
         return {}
+
+
+class ProductRemoval(Removal):
+    def __init__(self, inlets, fixed=True):
+        super(Removal, self).__init__(inlets, {}, fixed=fixed)
 
 
 class Mixer(Component):
