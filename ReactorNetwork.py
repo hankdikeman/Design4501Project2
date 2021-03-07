@@ -56,4 +56,7 @@ class Network:
 
 # unit tests for reaction network class
 if __name__ == "__main__":
+    print(__doc__)
+    # generate network class
     net = Network()
+    # generate several components of different classes, add each to network
