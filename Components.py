@@ -94,8 +94,8 @@ class DistillationColumn(Component):
             Nmin = np.log(self.xi_lk * (1 - self.xi_hk) / ((1 - self.xi_lk)
                                                            * self.xi_hk)) / np.log(self.alpha[self.ind_lk])
             # Compute split fractions of all components
-            xi = np.power(self.rel_volatility, Nmin) * self.xi_hk / (
-                1 + (np.power(self.rel_volatility, Nmin) - 1) * self.xi_hk)
+            xi = np.power(self.alpha, Nmin) * self.xi_hk / (
+                1 + (np.power(self.alpha, Nmin) - 1) * self.xi_hk)
             # compute distillate and vapor flowrates
             self.outlets[self.vapor_out] = d = xi * self.inlets.values()[0]
             self.outlets[self.liquid_out] = b = (
@@ -106,16 +106,14 @@ class DistillationColumn(Component):
         def calc_bot_temp(self):
             # Compute mole fraction
             x_B = self.outlets[self.liquid_out] / \
-                sum(self.outlets[self.liquid_out])
-            self.temperature_bottom = B[self.ind_hk] / (A[self.ind_hk] - np.log10((self.pressure / 101) * np.sum(
-                x_B / self.rel_volatility))) - C[self.ind_hk]  # Check on pressure factor ???
+                np.sum(self.outlets[self.liquid_out])
+            return get_tsat((self.pressure) * np.sum(x_B / self.alpha))
 
         def calc_top_temp(self):
             # Compute mole fraction
             x_D = self.outlets[self.vapor_out] / \
-                sum(self.outlets[self.vapor_out])
-            self.temperature_top = B[self.ind_lk] / (A[self.ind_lk] - np.log10(
-                (self.pressure / 101) * self.rel_volatility[self.ind_lk] / np.sum(x_D * self.rel_volatility))) - C[self.ind_lk]
+                np.sum(self.outlets[self.vapor_out])
+            return get_tsat((self.pressure) * self.alpha[self.ind_lk] / np.sum(x_D * self.alpha))
 
 
 class Absorber(Component):
