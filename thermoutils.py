@@ -23,3 +23,10 @@ def get_psat(temperature):
 # get saturation temperature from saturation pressure
 def get_tsat(psat):
     return B / (A - np.log(psat)) - C
+
+# get heat of reaction
+def get_HRxn():
+    pass
+# get gibbs free energy of reaction
+def get_GRxn():
+    pass
