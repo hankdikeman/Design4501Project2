@@ -44,14 +44,18 @@ class Network:
                         (next_inlets[inflow] - inlets[inflow])
 
     def equilibrate_network(self):
+        n_iter = 0
         # while the network is not marked as equilibrated
-        while ~self.equilibrated:
+        while not self.equilibrated:
+            print("Iteration ", n_iter)
             # call iteration function
             self.iterate_network()
             # check if all components are at steady state solution
             self.equilibrated = True
             for component in self.component_set:
                 self.equilibrated &= component.check_solution()
+            print(self.equilibrated)
+            n_iter += 1
 
 
 # unit tests for reaction network class
@@ -60,3 +64,4 @@ if __name__ == "__main__":
     # generate network class
     net = Network()
     # generate several components of different classes, add each to network
+    net.equilibrate_network()

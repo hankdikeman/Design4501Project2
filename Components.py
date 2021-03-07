@@ -35,6 +35,22 @@ class Component(metaclass=ABCMeta):
         return True
 
 
+class Feed(Component):
+    def __init__(self, outlets):
+        super(Feed, self).__init__({}, outlets)
+
+    def calc_outlets(self):
+        return self.outlets
+
+
+class Removal(Component):
+    def __init__(self, inlets):
+        super(Removal, self).__init__(inlets, {})
+
+    def calc_outlets(self):
+        return {}
+
+
 class HeatExchanger(Component):
     def __init__(self, inlettemp, outlettemp, inlets, outlets):
         self.in_temp = inlettemp
@@ -189,9 +205,13 @@ class Absorber(Component):
         # The liquid component flowrates Solvent (water), FORM and MeOH
         return self.outlets
 
+
 if __name__ == "__main__":
     print(__doc__)
-    dict = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu4': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
-    absorber1 = Absorber(300, 2, 0.97, 5, 3, dict['mu1'], dict['mu2'], dict['mu3'], dict['mu4'])
-    recov = {'LK':0.99, 'HK': 0.001}
-    distillationColumn = DistillationColumn(300, 2, recov, dict['mu1'], dict['mu2'], dict['mu3'])
+    dict = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu2': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu3': np.array(
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]), 'mu4': np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13])}
+    absorber1 = Absorber(300, 2, 0.97, 5, 3,
+                         dict['mu1'], dict['mu2'], dict['mu3'], dict['mu4'])
+    recov = {'LK': 0.99, 'HK': 0.001}
+    distillationColumn = DistillationColumn(
+        300, 2, recov, dict['mu1'], dict['mu2'], dict['mu3'])
