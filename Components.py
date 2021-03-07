@@ -76,54 +76,46 @@ class Reactor(Component):
 
 
 class DistillationColumn(Component):
-    def __init__(self, temp_in, pressure, recov, inlets, outlets):
+    def __init__(self, temp_in, pressure, recov, inlets, v_out, l_out):
         self.temperature_feed = temp_in
         self.pressure = pressure
-        self.xi_hk, ind_hk = recov['HK']
-        self.xi_lk, ind_lk = recov['LK']
-        self.temperature_bottom
-        self.temperature_top
-        self.rel_volatility
+        self.xi_hk, self.ind_hk = recov['HK']
+        self.xi_lk, self.ind_lk = recov['LK']
+        # self.temperature_bottom
+        # self.temperature_top
+        self.vapor_out = v_out.keys()[0]
+        self.liquid_out = l_out.keys()[0]
+        self.alpha = get_psat(temp_in) / get_psat(temp_in)[self.ind_hk]
         # run super constructor
-        super(DistillationColumn, self).__init__(inlets, outlets)
+        super(DistillationColumn, self).__init__(inlets, {**v_out, **l_out})
 
         def get_outlet():
-            # Vapor pressure
-            P0 = get_psat(self.solvent_temp_in)
-            # Alpha calcs wrt to HK
-            self.rel_volatility = Psat / Psat[self.ind_hk]
             # Compute minimum number of trays
-            Nmin = np.log(xi[self.ind_lk] * (1 - xi[self.ind_hk]) / ((1 - xi[self.ind_lk])
-                                                                     * xi[self.ind_hk])) / np.log(self.rel_volatility[self.ind_lk])
+            Nmin = np.log(self.xi_lk * (1 - self.xi_hk) / ((1 - self.xi_lk)
+                                                           * self.xi_hk)) / np.log(self.alpha[self.ind_lk])
             # Compute split fractions of all components
-            xi = np.power(self.rel_volatility, Nmin) * xi[self.ind_hk] / (
-                1 + (np.power(self.rel_volatility, Nmin) - 1) * xi[self.ind_hk])
-            # Compute flow rates (distillate, bottom)
-            d = xi * f
-            b = (1 - xi) * f
-            return (d, b)  # Not sure on format of return
+            xi = np.power(self.rel_volatility, Nmin) * self.xi_hk / (
+                1 + (np.power(self.rel_volatility, Nmin) - 1) * self.xi_hk)
+            # compute distillate and vapor flowrates
+            self.outlets[self.vapor_out] = d = xi * self.inlets.values()[0]
+            self.outlets[self.liquid_out] = b = (
+                1 - xi) * self.inlets.values()[0]
+            return self.outlets
 
         # Calculate key temperatures
-        def calc_bot_temp(bottoms):
-            # Check to see if get_outlets() has been ran (requisite to have rel_volatility)
-            if (self.rel_volatility):
-                # Compute mole fraction
-                x_B = bottoms / sum(bottoms)
-                self.temperature_bottom = B[self.ind_hk] / (A[self.ind_hk] - np.log10((self.pressure / 101) * np.sum(
-                    x_B / self.rel_volatility))) - C[self.ind_hk]  # Check on pressure factor ???
-                return True
-            else:
-                return False
+        def calc_bot_temp(self):
+            # Compute mole fraction
+            x_B = self.outlets[self.liquid_out] / \
+                sum(self.outlets[self.liquid_out])
+            self.temperature_bottom = B[self.ind_hk] / (A[self.ind_hk] - np.log10((self.pressure / 101) * np.sum(
+                x_B / self.rel_volatility))) - C[self.ind_hk]  # Check on pressure factor ???
 
-        def calc_top_temp(tops):
-            if (self.rel_volatility):
-                # Compute mole fraction
-                x_D = tops / sum(tops)
-                self.temperature_top = B[self.ind_lk] / (A[self.ind_lk] - np.log10(
-                    (self.pressure / 101) * self.rel_volatility[self.ind_lk] / np.sum(x_D * self.rel_volatility))) - C[self.ind_lk]
-                return True
-            else:
-                return False
+        def calc_top_temp(self):
+            # Compute mole fraction
+            x_D = self.outlets[self.vapor_out] / \
+                sum(self.outlets[self.vapor_out])
+            self.temperature_top = B[self.ind_lk] / (A[self.ind_lk] - np.log10(
+                (self.pressure / 101) * self.rel_volatility[self.ind_lk] / np.sum(x_D * self.rel_volatility))) - C[self.ind_lk]
 
 
 class Absorber(Component):
