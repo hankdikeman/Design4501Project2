@@ -89,7 +89,7 @@ class DistillationColumn(Component):
 
         def get_outlet():
             # Vapor pressure
-            P0 = getSatP(self.solvent_temp_in)
+            P0 = get_psat(self.solvent_temp_in)
             # Alpha calcs wrt to HK
             self.rel_volatility = Psat / Psat[self.ind_hk]
             # Compute minimum number of trays
@@ -145,7 +145,7 @@ class Absorber(Component):
             n = key_index
             while (True):
                 # Vapor pressure
-                P0 = getSatP(self.solvent_temp_in)
+                P0 = get_psat(self.solvent_temp_in)
                 # Solvent flowrate
                 AF[n] = 1.4  # Key component effective absorption factor
                 # Also need to set air to zero (dont know what component)
