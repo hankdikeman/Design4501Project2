@@ -5,7 +5,7 @@ compositions as a function of inlet compositions
 """
 import numpy as np
 from abc import ABCMeta, abstractmethod
-import thermoutils
+from thermoutils import get_psat, get_tsat
 
 
 # baseclass for component
@@ -127,38 +127,42 @@ class DistillationColumn(Component):
 
 
 class Absorber(Component):
-    def __init__(self, solvent_t_in, pressure, key_recov, key_index, inlets, outlets):
+    def __init__(self, solvent_t_in, pressure, key_recovery, key_index, solvent_index, v_in, v_out, l_in, l_out):
         self.solvent_temp_in = solvent_t_in
         self.pressure = pressure
-        self.solvent_temp_out = None
-        self.key_recovery = key_recov
-        # Need to identify and set key compenent
-
-        # Need to have a component class where inlets have antionne coef., absorption coeff
+        self.key_recovery = key_recovery
+        self.key_index = key_index
+        self.solvent_index = solvent_index
+        self.vapor_in = v_in.keys()[0]
+        self.vapor_out = v_out.keys()[0]
+        self.liquid_in = l_in.keys()[0]
+        self.liquid_out = l_out.keys()[0]
         # run super constructor
-        super(Absorber, self).__init__(inlets, outlets)
+        super(Absorber, self).__init__({**v_in, **l_in}, {**v_out, **l_out})
 
         def calc_outlets():
             # Variables to track
-            l_0 = np.zeros(len(inlets))
-            AF = np.zeros(len(inlets))
-            n = key_index
+            l_0 = np.zeros(len(self.inlets.values()[0]))
+            AF = np.zeros(len(self.inlets.values()[0]))
+            v_Np1 = self.inlets[self.vapor_in]
+            n = self.key_index
             while (True):
                 # Vapor pressure
                 P0 = get_psat(self.solvent_temp_in)
                 # Solvent flowrate
                 AF[n] = 1.4  # Key component effective absorption factor
                 # Also need to set air to zero (dont know what component)
-                l_0[2] = AF[n] * sum(v_Np1) * P0[n] / self.pressure  # solvent
+                l_0[self.solvent_index] = AF[n] * \
+                    sum(v_Np1) * P0[n] / self.pressure  # solvent
                 # Number of stages (deleted l_0[n]):
                 N = np.log(((self.key_recovery - AF[n]) * v_Np1[n]) / (
                     AF[n] * (1 - self.key_recovery) * v_Np1[n])) / np.log(AF[n])
                 # Alpha
                 alpha = P0 / P0[n]
                 # Check to see if AF of solvent has been adjusted at the bottom yet
-                if (AF[2] == 0):
+                if (AF[self.solvent_index] == 0):
                     # Need someway to set absorption factors of remaining species (so minus key and air)
-                    AF[2] = AF[n] / alpha[2]
+                    AF[self.solvent_index] = AF[n] / alpha[self.solvent_index]
                 # Beta values
                 beta_N = (1 - AF**(N + 1)) / (1 - AF)
                 beta_Nm1 = (1 - AF**N) / (1 - AF)
@@ -166,21 +170,23 @@ class Absorber(Component):
                 v_1 = 1 / beta_N * v_Np1 + beta_Nm1 / beta_N * l_0
                 l_N = v_Np1 + l_0 - v_1
 
-                y_1 = v_1 / sum(v_1)
                 x_N = l_N / sum(l_N)
                 # Temperature of solvent out (bubble point)
                 alpha_avg = sum(x_N * alpha)
-                # Need to fix antionne coeff.
-                T_N = B[n] / (A[n] - np.log(self.pressure / alpha_avg)) - C[n]
+                # Need to fix Antoine coeff.
+                T_N = get_tsat(np.log(self.pressure / alpha_avg))
                 # Check top vs bottom solvent temp
                 if (abs(self.solvent_temp_in - T_N) > 100):
                     # Absortion factors with bottom temp
-                    P0_N = np.exp(A - B / (T_N + C))
-                    alpha_N_wat = P0_N[2] / P0_N[n]
+                    P0_N = get_psat(T_N)
+                    alpha_N_wat = P0_N[self.solvent_index] / P0_N[n]
                     AF_N_wat = AF[n] / alpha_N_wat
                     # Update absorption factors (Edmister equations)
-                    AF[2] = (AF_N_wat * (1 + AF[2]) + 0.25)**0.5 - 0.5
+                    AF[self.solvent_index] = (
+                        AF_N_wat * (1 + AF[self.solvent_index]) + 0.25)**0.5 - 0.5
                 else:
+                    self.outlets[self.vapor_out] = v_1
+                    self.outlets[self.liquid_out] = l_N
                     break
             # The liquid component flowrates Solvent (water), FORM and MeOH
-            return l_N
+            return self.outlets
