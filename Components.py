@@ -159,7 +159,6 @@ class Absorber(Component):
                 # Mass balance
                 v_1 = 1 / beta_N * v_Np1 + beta_Nm1 / beta_N * l_0
                 l_N = v_Np1 + l_0 - v_1
-
                 x_N = l_N / sum(l_N)
                 # Temperature of solvent out (bubble point)
                 alpha_avg = sum(x_N * alpha)
@@ -180,3 +179,10 @@ class Absorber(Component):
                     break
             # The liquid component flowrates Solvent (water), FORM and MeOH
             return self.outlets
+
+if __name__ == "__main__":
+    print(__doc__)
+    dict = {'mu1': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu2': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu3': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13]), 'mu4': np.array([0, 1, 2, 3, 4, 5, 6 ,7 ,8 , 9, 10, 11, 12, 13])}
+    absorber1 = Absorber(300, 2, 0.97, 5, 3, dict['mu1'], dict['mu2'], dict['mu3'], dict['mu4'])
+    recov = {'LK':0.99, 'HK': 0.001}
+    distillationColumn = DistillationColumn(300, 2, recov, dict['mu1'], dict['mu2'], dict['mu3'])
