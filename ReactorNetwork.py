@@ -51,6 +51,9 @@ class Network:
         return next_inlets
 
     def equilibrate_network(self):
+        # check stream coupling
+        self.check_stream_coupling()
+        # initialize count variable
         n_iter = 0
         # while the network is not marked as equilibrated
         while not self.equilibrated:
@@ -64,6 +67,18 @@ class Network:
                     next_inlets)
             print(self.equilibrated)
             n_iter += 1
+
+    def check_stream_coupling(self):
+        # check that every inlet has outlet and vice-versa
+        inlet_names = []
+        outlet_names = []
+        for component in self.component_set.values():
+            for outlets in component.outlets:
+                outlet_names = [*outlet_names, *outlets]
+            for inlets in component.inlets:
+                inlet_names = [*inlet_names, *inlets]
+        if set(inlet_names) != set(outlet_names):
+            raise ValueError('Not all streams have a start and end!!')
 
 
 # unit tests for reaction network class
