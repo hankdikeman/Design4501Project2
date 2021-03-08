@@ -4,6 +4,7 @@ components to find the steady state solution of system
 """
 import numpy as np
 import pprint
+import collections
 from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber, Feed, Removal, ProductRemoval, Mixer, Splitter, FlashTank
 from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
@@ -73,11 +74,13 @@ class Network:
         inlet_names = []
         outlet_names = []
         for component in self.component_set.values():
-            for outlets in component.outlets:
-                outlet_names = [*outlet_names, *outlets]
-            for inlets in component.inlets:
-                inlet_names = [*inlet_names, *inlets]
-        if set(inlet_names) != set(outlet_names):
+            for outlets in component.outlets.keys():
+                outlet_names = outlet_names + [outlets]
+            for inlets in component.inlets.keys():
+                inlet_names = inlet_names + [inlets]
+        print('inlet names:', inlet_names)
+        print('outlet names:', outlet_names)
+        if collections.Counter(inlet_names) != collections.Counter(outlet_names):
             raise ValueError('Not all streams have a start and end!!')
 
 

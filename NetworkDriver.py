@@ -7,8 +7,12 @@ from ReactorNetwork import Network
 from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber, Feed, Removal, ProductRemoval, Mixer, Splitter, FlashTank, StreamGen
 from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
+# Methanol reactor conditions
 TEMP_MEOH = 573
 PRESS_MEOH = 37500
+# Flash tank conditions
+F1PRESS = 760
+
 
 if __name__ == "__main__":
     # generate reactor network
@@ -36,10 +40,15 @@ if __name__ == "__main__":
     }
     net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.995, 's11'))
     # purge outlet
-    purge1inlet = {'s12': StreamGen()}
-    net1.add_component('Purge1', Removal(purge1inlet))
+    purge1inlets = {'s12': StreamGen()}
+    net1.add_component('Purge1', Removal(purge1inlets))
     # flash tank for reactor outlet
-
+    f1inlets = {'r11': StreamGen()}
+    f1vaporoutlets = {'f11': StreamGen()}
+    f1liquidoutlets = {'f12': StreamGen()}
+    f1recovery = {'Key': (0.005, 4)}
+    net1.add_component('F1', FlashTank(F1PRESS, f1recovery,
+                                       4, f1inlets, f1vaporoutlets, f1liquidoutlets))
     # distillation column for methanol
 
     # water outlet
@@ -67,3 +76,5 @@ if __name__ == "__main__":
     # water adsorber
 
     # water outlet
+
+    net1.check_stream_coupling()
