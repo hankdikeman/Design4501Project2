@@ -147,4 +147,5 @@ if __name__ == "__main__":
     net1.add_component('WaterOutlet2', Removal(waterinlet2))
     # check stream coupling for network
     net1.check_stream_coupling()
-
+    # test network equilibration
+    net1.equilibrate_network()

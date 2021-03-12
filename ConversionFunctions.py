@@ -25,9 +25,10 @@ def MethanolReactor(inlets, temperature, pressure):
     return inlets
 # Helper function to specify nonlinear equations from EQ constants (Use flsove)
 def MeOHRxnFunc(extent, n_total, inlets, pressure, Kp1, Kp2):
-    return \[
-    ((inlets[4]+extent[0])*(inlets[3]+extent[0]+extent[1])*n_total**2)/((inlets[1]-extent[0]-extent[1])*(inlets[0]-3*extent[0]-extent[1])**3)*(pressure/760)**(-2)-Kp1, \ # Rxn 1
-    ((inlets[2]+extent[1])*(inlets[3]+extent[0]+extent[1]))/((inlets[1]-extent[0]-extent[1])*(inlets[0]-3*extent[0]-extent[1]))-Kp2 \                                     # Rxn 2
+    return 
+    [
+    ((inlets[4]+extent[0])*(inlets[3]+extent[0]+extent[1])*n_total**2)/((inlets[1]-extent[0]-extent[1])*(inlets[0]-3*extent[0]-extent[1])**3)*(pressure/760)**(-2)-Kp1, 
+    ((inlets[2]+extent[1])*(inlets[3]+extent[0]+extent[1]))/((inlets[1]-extent[0]-extent[1])*(inlets[0]-3*extent[0]-extent[1]))-Kp2                                    
     ]
 
 # Formaldehyde reactor model
@@ -55,7 +56,7 @@ def OMEReactor(inlets, temperature, pressure):
     rxnConstA = np.array([-1.9020, 0.8147, -2.454, -2.454, -2.454, -2.454, -2.454])
     rxnConstB = np.array([3512, 240.25, 3029.6, 3029.6, 3029.6, 3029.6, 3029.6])
     # Initial EQ constants
-    K = n rxnConstA + rxnConstB/temperature
+    K = rxnConstA + rxnConstB/temperature
     # Adjust K for combination of rxns 1 + 2
     Ka = K[0]*K[1]
     Keq = K[2,8] # Slicing Ks 3-7 out of initial K array
@@ -78,11 +79,11 @@ def OMEReactor(inlets, temperature, pressure):
 # Helper function to specify nonlinear equations from EQ constants (Use flsove)
 def OMERxnFunc(extent, n_total, inlets, Keq):
     # Nomenclature: extents[0:5]~[A:F], Keq[0:5]~[A:F]
-    return [ \
-    ((inlets[8]+extent[0]-extent[1])*(inlets[3]+extent[0])*n_total)/((inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4])*(inlets[4]-2*extent[0])**2)-Keq[0], \ # Rxn A
-    ((inlets[9]+extent[1]-extent[2])*n_total)/((inlets[8]+extent[0]-extent[1])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[1], \                  # Rxn B
-    ((inlets[10]+extent[2]-extent[3])*n_total)/((inlets[9]+extent[1]-extent[2])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[2], \                 # Rxn C
-    ((inlets[11]+extent[3]-extent[4])*n_total)/((inlets[10]+extent[2]-extent[3])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[3], \                # Rxn D
-    ((inlets[12]+extent[4]-extent[3])*n_total)/((inlets[11]+extent[3]-extent[4])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[4], \                # Rxn E
-    ((inlets[13]+extent[5])*n_total)/((inlets[12]+extent[4]-extent[5])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[5] \                           # Rxn F
+    return [ 
+    ((inlets[8]+extent[0]-extent[1])*(inlets[3]+extent[0])*n_total)/((inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4])*(inlets[4]-2*extent[0])**2)-Keq[0], 
+    ((inlets[9]+extent[1]-extent[2])*n_total)/((inlets[8]+extent[0]-extent[1])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[1], 
+    ((inlets[10]+extent[2]-extent[3])*n_total)/((inlets[9]+extent[1]-extent[2])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[2], 
+    ((inlets[11]+extent[3]-extent[4])*n_total)/((inlets[10]+extent[2]-extent[3])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[3], 
+    ((inlets[12]+extent[4]-extent[3])*n_total)/((inlets[11]+extent[3]-extent[4])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[4], 
+    ((inlets[13]+extent[5])*n_total)/((inlets[12]+extent[4]-extent[5])*(inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]))-Keq[5] 
     ]
