@@ -148,13 +148,3 @@ if __name__ == "__main__":
     # check stream coupling for network
     net1.check_stream_coupling()
 
-# unresolved streams to be fixed
-# inlet names: ['a12', 'ad11', 'ad12', 'dc12', 'dc12', 'dc21', 'dc22', 'f11', 'f12', 'i1', 'i2', 'i3', 'm11', 'm21', 'm41', 'm41', 'r11', 'r21', 'r31', 's11', 's12', 's2', 's21', 's22']
-# outlet names: ['a11', 'a12', 'ad11', 'ad12', 'dc11', 'dc12', 'dc21', 'dc22', 'f11', 'f12', 'i1', 'i2', 'i3', 'm11', 'm11', 'm31', 'm41', 'r11', 'r21', 'r31', 's11', 's12', 's21', 's22'] 
-# 
-# UNRESOLVED STREAMS:
-# {'', 'a11', 's2', 'm31', 'dc11'}
-
-# for reference
-# def StreamGen(H2=0, CO2=0, CO=0, H2O=0, MEOH=0, FA=0, N2=0, O2=0, OME1=0, OME2=0, OME3=0, OME4=0, OME5=0, OME6=0):
-#    pass
