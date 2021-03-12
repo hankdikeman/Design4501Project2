@@ -177,6 +177,22 @@ class FlashTank(Component):
         return temp_guess - temp_comp
 
 
+class Adsorber(Component):
+    def __init__(self, recov, recov_index, inlets, outlets, ads_out):
+        self.outkey = list(outlets.keys())[0]
+        self.inkey = list(inlets.keys())[0]
+        self.adskey = list(ads_out.keys())[0]
+		self.recov = recov
+		self.recov_index = recov_index
+        # run super constructor
+        super(Adsorber, self).__init__(inlets, {**ads_out, **outlets})
+
+    def calc_outlets(self):
+		flows_in = self.inlets[self.inkey]
+		self.outlets[self.adskey] = flows_in[self.recov_index]*self.recov
+		self.outlets[self.outkey] = flows_in - flows_in[self.recov_index]*self.recov
+        return self.outlets
+
 class DistillationColumn(Component):
     def __init__(self, temp_in, pressure, recov, inlets, v_out, l_out):
         self.temperature_feed = temp_in
