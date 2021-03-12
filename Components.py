@@ -182,15 +182,15 @@ class Adsorber(Component):
         self.outkey = list(outlets.keys())[0]
         self.inkey = list(inlets.keys())[0]
         self.adskey = list(ads_out.keys())[0]
-		self.recov = recov
-		self.recov_index = recov_index
+        self.recov = recov
+        self.recov_index = recov_index
         # run super constructor
         super(Adsorber, self).__init__(inlets, {**ads_out, **outlets})
 
     def calc_outlets(self):
-		flows_in = self.inlets[self.inkey]
-		self.outlets[self.adskey] = flows_in[self.recov_index]*self.recov
-		self.outlets[self.outkey] = flows_in - flows_in[self.recov_index]*self.recov
+        flows_in = self.inlets[self.inkey]
+        self.outlets[self.adskey] = flows_in[self.recov_index]*self.recov
+        self.outlets[self.outkey] = flows_in - flows_in[self.recov_index]*self.recov
         return self.outlets
 
 class DistillationColumn(Component):

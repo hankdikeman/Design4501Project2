@@ -45,7 +45,7 @@ def get_GRxn():
     pass
 
 if __name__ == "__main__":
-	rel_vol_h20 = get_psat(298)/get_psat(298)[3]
+    rel_vol_h20 = get_psat(298)/get_psat(298)[3]
 
-	for i in range(len(labels)):
-		print(labels[i],rel_vol_h20[i])
+    for i in range(len(labels)):
+        print(labels[i],rel_vol_h20[i])
