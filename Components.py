@@ -8,9 +8,8 @@ from abc import ABCMeta, abstractmethod
 from thermoutils import get_psat, get_tsat
 from scipy.optimize import newton
 
+
 # baseclass for component
-
-
 class Component(metaclass=ABCMeta):
     def __init__(self, inlets, outlets, fixed=False):
         self.inlets = inlets
@@ -26,9 +25,11 @@ class Component(metaclass=ABCMeta):
     def calc_outlets(self):
         pass
 
+    # check whether stream is fixed
     def is_fixed(self):
         return self.fixed
 
+    # check whether solution has converged for this component
     def check_solution(self, next_inlets):
         # check all inlet flows to be the same within tolerance
         for inflow in self.inlets.keys():
@@ -301,10 +302,12 @@ class Absorber(Component):
         return self.outlets
 
 
+# generate streams with components specified with kwargs
 def StreamGen(H2=0, CO2=0, CO=0, H2O=0, MEOH=0, FA=0, N2=0, O2=0, OME1=0, OME2=0, OME3=0, OME4=0, OME5=0, OME6=0):
     return np.array([H2, CO2, CO, H2O, MEOH, FA, N2, O2, OME1, OME2, OME3, OME4, OME5, OME6])
 
 
+# unit tests for components
 if __name__ == "__main__":
     print(__doc__)
     dict1 = {'mu1': np.array([1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0])}

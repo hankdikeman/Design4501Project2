@@ -53,12 +53,14 @@ if __name__ == "__main__":
     inlets = {'f12': StreamGen()}
     v_out = {'dc11': StreamGen()}
     l_out = {'dc12': StreamGen()}
+    DC1_TEMP = 350
+    DC1_PRESS = 760 * 2
     net1.add_component('DC1', DistillationColumn(DC1_TEMP, DC1_PRESS, DC1_recov, inlets, v_out, l_out))
     # water outlet
     waterinlet = {'dc12': StreamGen()}
     net1.add_component('WaterR1', Removal(waterinlet))
     # splitter for pure methanol
-    s2inlets = {'s2': StreamGen()}
+    s2inlets = {'dc11': StreamGen()}
     s2outlets = {
         's21': StreamGen(),
         's22': StreamGen()
@@ -72,7 +74,7 @@ if __name__ == "__main__":
         's21': StreamGen(),
         'i2': StreamGen(O2=60, N2=20)
     }
-    mix2outlets = {'m11': StreamGen()}
+    mix2outlets = {'m21': StreamGen()}
     net1.add_component('M2', Mixer(mix2inlets, mix2outlets))
     # formaldehyde reactor
     r2inlets = {'m21': StreamGen()}
@@ -91,10 +93,13 @@ if __name__ == "__main__":
     loutabs = {'a12': StreamGen()}
     ABS_WATERTEMP = 310
     ABS_PRESS = 760
-    net1.add_component('A1', Absorber(ABS_WATERTEMP, ABS_PRESS, key_recovery=0.99, key_index=5, solvent_index=3, vinabs, voutabs, linabs, loutabs))
+    abs_key_recov = 0.99
+    abs_key_index = 5
+    abs_solvent_index = 3
+    net1.add_component('A1', Absorber(ABS_WATERTEMP, ABS_PRESS, abs_key_recov, abs_key_index, abs_solvent_index, vinabs, voutabs, linabs, loutabs))
     # air removal
     airinlet  = {'a11': StreamGen()}
-    net1.add_component('AirR1', Removal(waterinlet))
+    net1.add_component('AirR1', Removal(airinlet))
     # OME + methanol mixer
     mix3inlets = {
         'ad11': StreamGen(),
@@ -104,7 +109,7 @@ if __name__ == "__main__":
     net1.add_component('M3', Mixer(mix3inlets, mix3outlets))
     # recycle + OME + methanol mixer
     mix4inlets = {
-        'm41': StreamGen(),
+        'm31': StreamGen(),
         'a12': StreamGen()
     }
     mix4outlets = {'m41': StreamGen()}
@@ -112,6 +117,8 @@ if __name__ == "__main__":
     # OME reactor
     r3inlets = {'m41': StreamGen()}
     r3outlets = {'r31': StreamGen()}
+    TEMP_OME = 350
+    PRESS_OME = 760
     net1.add_component('R3', Reactor(TEMP_OME, PRESS_OME,
                                      r3inlets, r3outlets, OMEReactor))
     # OME column
@@ -129,12 +136,21 @@ if __name__ == "__main__":
     ad_in = {'dc21': StreamGen()}
     adwater_out = {'ad12': StreamGen()}
     adprod_out = {'ad11': StreamGen()}
-    net1.add_component('AD1', Adsorber(recov=1, recov_index=3, ad_in, adprod_out, adwater_out):
+    ad_recov = 1
+    ad_recov_index = 3
+    net1.add_component('AD1', Adsorber(ad_recov, ad_recov_index, ad_in, adprod_out, adwater_out))
     # water outlet
     waterinlet2 = {'ad12': StreamGen()}
     net1.add_component('WaterOutlet2', Removal(waterinlet2))
     # check stream coupling for network
     net1.check_stream_coupling()
+
+# unresolved streams to be fixed
+# inlet names: ['a12', 'ad11', 'ad12', 'dc12', 'dc12', 'dc21', 'dc22', 'f11', 'f12', 'i1', 'i2', 'i3', 'm11', 'm21', 'm41', 'm41', 'r11', 'r21', 'r31', 's11', 's12', 's2', 's21', 's22']
+# outlet names: ['a11', 'a12', 'ad11', 'ad12', 'dc11', 'dc12', 'dc21', 'dc22', 'f11', 'f12', 'i1', 'i2', 'i3', 'm11', 'm11', 'm31', 'm41', 'r11', 'r21', 'r31', 's11', 's12', 's21', 's22'] 
+# 
+# UNRESOLVED STREAMS:
+# {'', 'a11', 's2', 'm31', 'dc11'}
 
 # for reference
 # def StreamGen(H2=0, CO2=0, CO=0, H2O=0, MEOH=0, FA=0, N2=0, O2=0, OME1=0, OME2=0, OME3=0, OME4=0, OME5=0, OME6=0):

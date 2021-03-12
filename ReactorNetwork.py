@@ -78,8 +78,18 @@ class Network:
                 outlet_names = outlet_names + [outlets]
             for inlets in component.inlets.keys():
                 inlet_names = inlet_names + [inlets]
+        # sort lists of streams
+        inlet_names.sort()
+        outlet_names.sort()
+        # print stream names
         print('inlet names:', inlet_names)
-        print('outlet names:', outlet_names)
+        print('outlet names:', outlet_names, '\n')
+        # print unresolved streams
+        print('UNRESOLVED STREAMS:')
+        print(set(inlet_names) ^ set(outlet_names))
+        if (set(inlet_names) ^ set(outlet_names)) == set():
+            print('\tAll Streams Resolved Correctly! Reactor Network Ready to Go')
+        # raise ValueError if some streams are unmatched
         if collections.Counter(inlet_names) != collections.Counter(outlet_names):
             raise ValueError('Not all streams have a start and end!!')
 
