@@ -6,6 +6,9 @@ import numpy as np
 from ReactorNetwork import Network
 from Components import Component, HeatExchanger, Compressor, Turbine, Reactor, DistillationColumn, Absorber, Adsorber, Feed, Removal, ProductRemoval, Mixer, Splitter, FlashTank, StreamGen
 from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
+import warnings
+# ignore annoying numpy truedivide warnings, implement our own for divergence
+warnings.filterwarnings("ignore")
 
 
 if __name__ == "__main__":

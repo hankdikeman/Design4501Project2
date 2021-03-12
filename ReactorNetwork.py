@@ -82,8 +82,10 @@ class Network:
         inlet_names.sort()
         outlet_names.sort()
         # print stream names
+        print('-'*100 + '\n')
         print('inlet names:', inlet_names)
         print('outlet names:', outlet_names, '\n')
+        print('-'*100 + '\n')
         # print unresolved streams
         print('UNRESOLVED STREAMS:')
         print(set(inlet_names) ^ set(outlet_names))
