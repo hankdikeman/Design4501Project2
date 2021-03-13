@@ -106,7 +106,7 @@ if __name__ == "__main__":
     # OME + methanol mixer
     mix3inlets = {
         'ad11': StreamGen(),
-        's22': StreamGen(H2=60, CO2=20)
+        's22': StreamGen()
     }
     mix3outlets = {'m31': StreamGen()}
     net1.add_component('M3', Mixer(mix3inlets, mix3outlets))
