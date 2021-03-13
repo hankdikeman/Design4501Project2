@@ -215,17 +215,19 @@ class DistillationColumn(Component):
         super(DistillationColumn, self).__init__(inlets, {**v_out, **l_out})
 
     def calc_outlets(self):
-        # Compute minimum number of trays
-        Nmin = np.log(self.xi_lk * (1 - self.xi_hk) / ((1 - self.xi_lk)
-                                                       * self.xi_hk)) / np.log(self.alpha[self.ind_lk])
-        # Compute split fractions of all components
-        xi = np.power(self.alpha, Nmin) * self.xi_hk / (
-            1 + (np.power(self.alpha, Nmin) - 1) * self.xi_hk)
-        # compute distillate and vapor flowrates
-        self.outlets[self.vapor_out] = d = xi * list(self.inlets.values())[0]
-        self.outlets[self.liquid_out] = b = (
-            1 - xi) * list(self.inlets.values())[0]
-        return self.outlets
+        if (np.sum(list(self.inlets.values())[0])):
+            # Compute minimum number of trays
+            Nmin = np.log(self.xi_lk * (1 - self.xi_hk) / ((1 - self.xi_lk)
+                                                           * self.xi_hk)) / np.log(self.alpha[self.ind_lk])
+            # Compute split fractions of all components
+            xi = np.power(self.alpha, Nmin) * self.xi_hk / (
+                1 + (np.power(self.alpha, Nmin) - 1) * self.xi_hk)
+            # compute distillate and vapor flowrates
+            self.outlets[self.vapor_out] = d = xi * list(self.inlets.values())[0]
+            self.outlets[self.liquid_out] = b = (
+                1 - xi) * list(self.inlets.values())[0]
+            return self.outlets
+        return self.inlets
 
     # Calculate key temperatures
     def calc_bot_temp(self):
@@ -256,56 +258,58 @@ class Absorber(Component):
         super(Absorber, self).__init__({**v_in, **l_in}, {**v_out, **l_out})
 
     def calc_outlets(self):
-        # Variables to track
-        l_0 = np.zeros(len(list(self.inlets.values())[0]))
-        AF = np.zeros(len(list(self.inlets.values())[0]))
-        v_Np1 = self.inlets[self.vapor_in]
-        n = self.key_index
-        while (True):
-            # Vapor pressure
-            P0 = get_psat(self.solvent_temp_in)
-            # Solvent flowrate
-            AF[n] = 1.4  # Key component effective absorption factor
-            # Also need to set air to zero (dont know what component)
-            l_0[self.solvent_index] = AF[n] * \
-                sum(v_Np1) * P0[n] / self.pressure  # solvent
-            # Number of stages (deleted l_0[n]):
-            N = np.log(((self.key_recovery - AF[n]) * v_Np1[n]) / (
-                AF[n] * (1 - self.key_recovery) * v_Np1[n])) / np.log(AF[n])
-            # Alpha
-            alpha = P0 / P0[n]
-            # Check to see if AF of solvent has been adjusted at the bottom yet
-            if (AF[self.solvent_index] == 0):
-                # Need someway to set absorption factors of remaining species (so minus key and air)
-                AF[self.solvent_index] = AF[n] / alpha[self.solvent_index]
-            # Beta values
-            beta_N = (1 - AF**(N + 1)) / (1 - AF)
-            beta_Nm1 = (1 - AF**N) / (1 - AF)
-            # Mass balance
-            v_1 = 1 / beta_N * v_Np1 + beta_Nm1 / beta_N * l_0
-            l_N = v_Np1 + l_0 - v_1
-            x_N = l_N / sum(l_N)
-            # Temperature of solvent out (bubble point)
-            alpha_avg = sum(x_N * alpha)
-            # Need to fix Antoine coeff.
-            T_N = get_tsat(np.log(self.pressure / alpha_avg)
-                           )[self.solvent_index]
-            # Check top vs bottom solvent temp
-            if (abs(self.solvent_temp_in - T_N) > 100):
-                # Absortion factors with bottom temp
-                P0_N = get_psat(T_N)
-                alpha_N_wat = P0_N[self.solvent_index] / P0_N[n]
-                AF_N_wat = AF[n] / alpha_N_wat
-                # Update absorption factors (Edmister equations)
-                AF[self.solvent_index] = (
-                    AF_N_wat * (1 + AF[self.solvent_index]) + 0.25)**0.5 - 0.5
-            else:
-                self.inlets[self.liquid_in] = l_0
-                self.outlets[self.vapor_out] = v_1
-                self.outlets[self.liquid_out] = l_N
-                break
-        # The liquid component flowrates Solvent (water), FORM and MeOH
-        return self.outlets
+        if (np.sum(list(self.inlets.values())[0])):
+            # Variables to track
+            l_0 = np.zeros(len(list(self.inlets.values())[0]))
+            AF = np.zeros(len(list(self.inlets.values())[0]))
+            v_Np1 = self.inlets[self.vapor_in]
+            n = self.key_index
+            while (True):
+                # Vapor pressure
+                P0 = get_psat(self.solvent_temp_in)
+                # Solvent flowrate
+                AF[n] = 1.4  # Key component effective absorption factor
+                # Also need to set air to zero (dont know what component)
+                l_0[self.solvent_index] = AF[n] * \
+                    sum(v_Np1) * P0[n] / self.pressure  # solvent
+                # Number of stages (deleted l_0[n]):
+                N = np.log(((self.key_recovery - AF[n]) * v_Np1[n]) / (
+                    AF[n] * (1 - self.key_recovery) * v_Np1[n])) / np.log(AF[n])
+                # Alpha
+                alpha = P0 / P0[n]
+                # Check to see if AF of solvent has been adjusted at the bottom yet
+                if (AF[self.solvent_index] == 0):
+                    # Need someway to set absorption factors of remaining species (so minus key and air)
+                    AF[self.solvent_index] = AF[n] / alpha[self.solvent_index]
+                # Beta values
+                beta_N = (1 - AF**(N + 1)) / (1 - AF)
+                beta_Nm1 = (1 - AF**N) / (1 - AF)
+                # Mass balance
+                v_1 = 1 / beta_N * v_Np1 + beta_Nm1 / beta_N * l_0
+                l_N = v_Np1 + l_0 - v_1
+                x_N = l_N / sum(l_N)
+                # Temperature of solvent out (bubble point)
+                alpha_avg = sum(x_N * alpha)
+                # Need to fix Antoine coeff.
+                T_N = get_tsat(np.log(self.pressure / alpha_avg)
+                               )[self.solvent_index]
+                # Check top vs bottom solvent temp
+                if (abs(self.solvent_temp_in - T_N) > 100):
+                    # Absortion factors with bottom temp
+                    P0_N = get_psat(T_N)
+                    alpha_N_wat = P0_N[self.solvent_index] / P0_N[n]
+                    AF_N_wat = AF[n] / alpha_N_wat
+                    # Update absorption factors (Edmister equations)
+                    AF[self.solvent_index] = (
+                        AF_N_wat * (1 + AF[self.solvent_index]) + 0.25)**0.5 - 0.5
+                else:
+                    self.inlets[self.liquid_in] = l_0
+                    self.outlets[self.vapor_out] = v_1
+                    self.outlets[self.liquid_out] = l_N
+                    break
+            # The liquid component flowrates Solvent (water), FORM and MeOH
+            return self.outlets
+        return self.inlets
 
 
 # generate streams with components specified with kwargs
