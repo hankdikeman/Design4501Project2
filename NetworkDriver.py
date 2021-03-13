@@ -17,34 +17,34 @@ if __name__ == "__main__":
     # make network object
     net1 = Network()
     # feed to reactor
-    i1outlets = {'i1': StreamGen(H2=60, CO2=20)}
+    i1outlets = {'i1': StreamGen()}
     net1.add_component('I1', Feed(i1outlets))
     # mixer for recycle and feed
     mix1inlets = {
         'i1': StreamGen(H2=60, CO2=20),
-        's11': StreamGen()
+        's11': StreamGen(H2=60, CO2=20, CO=5)
     }
     mix1outlets = {'m11': StreamGen()}
     net1.add_component('M1', Mixer(mix1inlets, mix1outlets))
     # methanol reactor
     TEMP_MEOH = 573
     PRESS_MEOH = 37500
-    r1inlets = {'m11': StreamGen(CO2 = 5, H2 = 5, MEOH = 5, H2O=5, CO=5)}
+    r1inlets = {'m11': StreamGen(H2=100, CO2=35, MEOH = 5, H2O=5, CO=5)}
     r1outlets = {'r11': StreamGen()}
     net1.add_component('R1', Reactor(TEMP_MEOH, PRESS_MEOH,
                                      r1inlets, r1outlets, MethanolReactor))
     # splitter for recycle
-    s1inlets = {'f11': StreamGen()}
+    s1inlets = {'f11': StreamGen(CO2=20, H2=60, CO=5)}
     s1outlets = {
         's11': StreamGen(),
         's12': StreamGen()
     }
-    net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.995, 's11'))
+    net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.98, 's11'))
     # purge outlet
-    purge1inlets = {'s12': StreamGen()}
+    purge1inlets = {'s12': StreamGen(CO2=1, CO=1, H2=1)}
     net1.add_component('Purge1', Removal(purge1inlets))
     # flash tank for reactor outlet
-    f1inlets = {'r11': StreamGen()}
+    f1inlets = {'r11': StreamGen(CO2=20, H2=60, MEOH=15, H2O=15, CO=5)}
     f1vaporoutlets = {'f11': StreamGen()}
     f1liquidoutlets = {'f12': StreamGen()}
     f1recovery = {'Key': (0.005, 4)}
@@ -53,34 +53,34 @@ if __name__ == "__main__":
                                        4, f1inlets, f1vaporoutlets, f1liquidoutlets))
     # distillation column for methanol
     DC1_recov = {'HK':(0.99,3),'LK':(0.99,4)}
-    inlets = {'f12': StreamGen()}
+    inlets = {'f12': StreamGen(MEOH=15, H20=15)}
     v_out = {'dc11': StreamGen()}
     l_out = {'dc12': StreamGen()}
     DC1_TEMP = 350
     DC1_PRESS = 760 * 2
     net1.add_component('DC1', DistillationColumn(DC1_TEMP, DC1_PRESS, DC1_recov, inlets, v_out, l_out))
     # water outlet
-    waterinlet = {'dc12': StreamGen()}
+    waterinlet = {'dc12': StreamGen(H2O=15)}
     net1.add_component('WaterR1', Removal(waterinlet))
     # splitter for pure methanol
-    s2inlets = {'dc11': StreamGen()}
+    s2inlets = {'dc11': StreamGen(MEOH=15)}
     s2outlets = {
         's21': StreamGen(),
         's22': StreamGen()
     }
     net1.add_component('S2', Splitter(s2inlets, s2outlets, 0.666, 's21'))
     # air inlet
-    i2outlets = {'i2': StreamGen(O2=20, N2=80)}
+    i2outlets = {'i2': StreamGen(O2=10, N2=40)}
     net1.add_component('I2', Feed(i2outlets))
     # mixer for oxygen and methanol into formaldehyde
     mix2inlets = {
-        's21': StreamGen(),
+        's21': StreamGen(MEOH=10),
         'i2': StreamGen(O2=60, N2=20)
     }
     mix2outlets = {'m21': StreamGen()}
     net1.add_component('M2', Mixer(mix2inlets, mix2outlets))
     # formaldehyde reactor
-    r2inlets = {'m21': StreamGen(MEOH=5, O2=5, FA=5, H2O=5)}
+    r2inlets = {'m21': StreamGen(MEOH=10, O2=10, N2=40)}
     r2outlets = {'r21': StreamGen()}
     TEMP_FA = 700
     PRESS_FA = 760
@@ -90,9 +90,9 @@ if __name__ == "__main__":
     i3outlets = {'i3': StreamGen(H2O=50)}
     net1.add_component('I3', Feed(i3outlets))
     # formaldehyde absorber
-    vinabs = {'r21': StreamGen()}
-    linabs = {'i3': StreamGen()}
-    voutabs = {'a11': StreamGen()}
+    vinabs = {'r21': StreamGen(FA=10, O2=5, N2=40, H2O=10)}
+    linabs = {'i3': StreamGen(H2O=5)}
+    voutabs = {'a11': StreamGen(O2=5, N2=40)}
     loutabs = {'a12': StreamGen()}
     ABS_WATERTEMP = 310
     ABS_PRESS = 760
@@ -105,20 +105,20 @@ if __name__ == "__main__":
     net1.add_component('AirR1', Removal(airinlet))
     # OME + methanol mixer
     mix3inlets = {
-        'ad11': StreamGen(),
-        's22': StreamGen()
+        'ad11': StreamGen(OME1=5, OME2=5, FA=60, MEOH=30),
+        's22': StreamGen(MEOH=5)
     }
     mix3outlets = {'m31': StreamGen()}
     net1.add_component('M3', Mixer(mix3inlets, mix3outlets))
     # recycle + OME + methanol mixer
     mix4inlets = {
         'm31': StreamGen(),
-        'a12': StreamGen()
+        'a12': StreamGen(FA=10, H2O=15)
     }
     mix4outlets = {'m41': StreamGen()}
     net1.add_component('M4', Mixer(mix4inlets, mix4outlets))
     # OME reactor
-    r3inlets = {'m41': StreamGen(OME1= 5, OME2=4, OME3=3, OME4=2, OME5=1, OME6=1, MEOH=5, FA=5, H2O=5)}
+    r3inlets = {'m41': StreamGen(OME1= 5, OME2=5, MEOH=35, FA=70, H2O=15)}
     r3outlets = {'r31': StreamGen()}
     TEMP_OME = 350
     PRESS_OME = 760
@@ -126,24 +126,24 @@ if __name__ == "__main__":
                                      r3inlets, r3outlets, OMEReactor))
     # OME column
     DC2_recov = {'HK':(0.99,10),'LK':(0.99,9)}
-    inletsdc2 = {'r31': StreamGen()}
+    inletsdc2 = {'r31': StreamGen(OME1= 5, OME2=5, OME3=5, OME4=5, OME5=5, OME6=5, MEOH=35, FA=70, H2O=15)}
     v_outdc2 = {'dc21': StreamGen()}
     l_outdc2 = {'dc22': StreamGen()}
     DC2_TEMP = 80
     DC2_PRESS = 760 * 2
     net1.add_component('DC2', DistillationColumn(DC2_TEMP, DC2_PRESS, DC2_recov, inletsdc2, v_outdc2, l_outdc2))
     # product outlet
-    productinlet  = {'dc22': StreamGen()}
+    productinlet  = {'dc22': StreamGen(OME3=5, OME4=5, OME5=5, OME6=5)}
     net1.add_component('ProductOutlet', ProductRemoval(productinlet))
     # water adsorber
-    ad_in = {'dc21': StreamGen()}
+    ad_in = {'dc21': StreamGen(OME1= 5, OME2=5, MEOH=35, FA=70, H2O=15)}
     adwater_out = {'ad12': StreamGen()}
     adprod_out = {'ad11': StreamGen()}
     ad_recov = 1
     ad_recov_index = 3
     net1.add_component('AD1', Adsorber(ad_recov, ad_recov_index, ad_in, adprod_out, adwater_out))
     # water outlet
-    waterinlet2 = {'ad12': StreamGen()}
+    waterinlet2 = {'ad12': StreamGen(H2O=20)}
     net1.add_component('WaterOutlet2', Removal(waterinlet2))
     # check stream coupling for network
     net1.check_stream_coupling()
