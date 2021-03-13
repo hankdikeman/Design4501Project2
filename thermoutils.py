@@ -15,14 +15,15 @@ B = np.array([164.90, 3103.39, 530.22, 3816.44, 3626.55, 2204.13, 588.72,
 C = np.array([3.19, -0.16, -13.15, -46.13, -34.29, -30.15, -6.6,
               -6.45, -52.35, -91.73, -76.75, -96.99, -95.59, -65.12])
 
-# Standard state Gibbs free energy (kJ/mol)
-G = np.array([0, -394.4, -137.2, -228.6, -162.3, -1, -1,
-              0, -1, -1, -1, -1, -1, -1])
 
-# Standard state enthalpies (kJ/mol)
-H = np.array([0, -393.5, -110.5, -241.8, -201.3, -1, -1,
-              0, -1, -1, -1, -1, -1, -1])
-
+# Heat of formations (kJ/mol)
+Hf = np.array([0, -393.5, -110.5, -241.8, -201.3, -108.6, 0,
+              0, -369.447, -522.205, -674.963, -827.721, -980.479, -1285.994])
+# Heat vaporization (kJ/mol)
+Hvap = np.array([0.44936, 15.326, 6.0, 40.7, 35.21, 23.3, 5.56,
+                3.4099, 27.058, 31.685, 36.317, 40.949, 45.580, 50.212, 54.844])
+# Specific heat capacity
+Cp = np.array([])
 
 # get saturation pressure from temperature
 def get_psat(temperature):
