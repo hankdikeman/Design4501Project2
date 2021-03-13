@@ -80,7 +80,7 @@ if __name__ == "__main__":
     mix2outlets = {'m21': StreamGen()}
     net1.add_component('M2', Mixer(mix2inlets, mix2outlets))
     # formaldehyde reactor
-    r2inlets = {'m21': StreamGen()}
+    r2inlets = {'m21': StreamGen(MEOH=5, O2=5, FA=5, H2O=5)}
     r2outlets = {'r21': StreamGen()}
     TEMP_FA = 700
     PRESS_FA = 760
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     mix4outlets = {'m41': StreamGen()}
     net1.add_component('M4', Mixer(mix4inlets, mix4outlets))
     # OME reactor
-    r3inlets = {'m41': StreamGen()}
+    r3inlets = {'m41': StreamGen(OME1= 5, OME2=4, OME3=3, OME4=2, OME5=1, OME6=1, MEOH=5, FA=5, H2O=5)}
     r3outlets = {'r31': StreamGen()}
     TEMP_OME = 350
     PRESS_OME = 760

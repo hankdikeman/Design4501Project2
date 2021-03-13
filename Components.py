@@ -154,17 +154,19 @@ class FlashTank(Component):
         super(FlashTank, self).__init__(inlets, {**v_out, **l_out})
 
     def calc_outlets(self):
-        temp = newton(self.temperature_iteration, 300)
-        alpha = get_psat(temp) / get_psat(temp)[self.ind_key]
-        # Calculate recoveries
-        xi = np.divide(alpha * self.xi_key, 1 + (alpha - 1) * self.xi_key)
-        # Mass Balance
-        self.outlets[self.vapor_out] = v = xi * list(self.inlets.values())[0]
-        self.outlets[self.liquid_out] = l = (
-            1 - xi) * list(self.inlets.values())[0]
-        print("vout", self.outlets[self.vapor_out])
-        print("lout", self.outlets[self.liquid_out])
-        return self.outlets
+        if (np.sum(list(self.inlets.values())[0])):
+            temp = newton(self.temperature_iteration, 300)
+            alpha = get_psat(temp) / get_psat(temp)[self.ind_key]
+            # Calculate recoveries
+            xi = np.divide(alpha * self.xi_key, 1 + (alpha - 1) * self.xi_key)
+            # Mass Balance
+            self.outlets[self.vapor_out] = v = xi * list(self.inlets.values())[0]
+            self.outlets[self.liquid_out] = l = (
+                1 - xi) * list(self.inlets.values())[0]
+            print("vout", self.outlets[self.vapor_out])
+            print("lout", self.outlets[self.liquid_out])
+            return self.outlets
+        return self.inlets
 
     def temperature_iteration(self, temp_guess):
         alpha = get_psat(temp_guess) / get_psat(temp_guess)[self.ind_key]
