@@ -64,9 +64,13 @@ class Network:
             next_inlets = self.iterate_network()
             # check if all components are at steady state solution
             self.equilibrated = True
+            print('\n\nNext Inlets:')
+            pprint.pprint(next_inlets)
             for component in self.component_set:
-                self.equilibrated &= self.component_set[component].check_solution(
-                    next_inlets)
+                if not self.component_set[component].is_fixed():
+                    print('Checked Component:',self.component_set[component])
+                    self.equilibrated &= self.component_set[component].check_solution(
+                        next_inlets)
             print(self.equilibrated)
             n_iter += 1
 

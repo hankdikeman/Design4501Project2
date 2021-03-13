@@ -33,6 +33,7 @@ class Component(metaclass=ABCMeta):
     def check_solution(self, next_inlets):
         # check all inlet flows to be the same within tolerance
         for inflow in self.inlets.keys():
+            print('inflow label:',inflow)
             previous = self.inlets[inflow]
             iterated = next_inlets[inflow]
             if np.linalg.norm(previous - iterated) > 1E-9:
@@ -42,7 +43,7 @@ class Component(metaclass=ABCMeta):
 
 class Feed(Component):
     def __init__(self, outlets):
-        super(Feed, self).__init__({}, outlets)
+        super(Feed, self).__init__({}, outlets, fixed=True)
 
     def calc_outlets(self):
         return self.outlets
@@ -58,7 +59,7 @@ class Removal(Component):
 
 class ProductRemoval(Removal):
     def __init__(self, inlets, fixed=True):
-        super(Removal, self).__init__(inlets, {}, fixed=fixed)
+        super(Removal, self).__init__(inlets, {})
 
 
 class Mixer(Component):
