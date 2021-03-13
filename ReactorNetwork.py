@@ -31,11 +31,12 @@ class Network:
         next_inlets = {}
         # loop through components and store inlets in dictionary
         for component in self.component_set.keys():
+            print(component)
+            print(self.component_set[component])
+            print(self.component_set[component].calc_outlets())
             # merge current inlets dict
-            next_inlets = {
-                **self.component_set[component].calc_outlets(), **next_inlets}
-            current_inlets = {
-                **self.component_set[component].get_inlets(), **current_inlets}
+            next_inlets = {**(self.component_set[component].calc_outlets()), **next_inlets}
+            current_inlets = {**(self.component_set[component].get_inlets()), **current_inlets}
         # use intersection of dictionary keysets to avoid key error
         # feed and outlets will not be iterated in this set-up (might need to be changed)
         iterable_streams = current_inlets.keys() & next_inlets.keys()

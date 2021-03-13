@@ -70,6 +70,7 @@ class Mixer(Component):
         for keys in self.inlets.keys():
             mixed += self.inlets[keys]
         self.outlets[next(iter(self.outlets))] = mixed
+        return self.outlets
 
 
 class Splitter(Component):
@@ -86,6 +87,7 @@ class Splitter(Component):
             else:
                 self.outlets[stream] = list(self.inlets.values())[0] \
                     * (1 - self.split)
+        return self.outlets
 
 
 class HeatExchanger(Component):
@@ -135,8 +137,9 @@ class Reactor(Component):
         super(Reactor, self).__init__(inlets, outlets)
 
     def calc_outlets(self):
-        list(self.outlets.values())[0] = self.conversion_function(
-            list(self.inlets.values)[0], self.pressure, self.temperature)
+        # calculate new outlet values and return
+        self.outlets[list(self.outlets.keys())[0]] = self.conversion_function(
+            list(self.inlets.values())[0], self.pressure, self.temperature)
         return self.outlets
 
 

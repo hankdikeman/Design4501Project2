@@ -5,6 +5,7 @@ function to determine steady state solution of reactor network.
 """
 import numpy as np
 from scipy.optimize import newton, fsolve
+from thermoutils import get_psat, get_tsat, get_HRxn, get_GRxn
 
 # Methanol reactor model
 def MethanolReactor(inlets, temperature, pressure):

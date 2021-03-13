@@ -37,12 +37,12 @@ def get_tsat(psat):
 
 
 def get_HRxn():
-    pass
+    return 0
 # get gibbs free energy of reaction
 
 
 def get_GRxn():
-    pass
+    return 0
 
 if __name__ == "__main__":
     rel_vol_h20 = get_psat(298)/get_psat(298)[3]
