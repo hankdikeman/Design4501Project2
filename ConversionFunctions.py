@@ -4,7 +4,7 @@ formaldehyde reactor, OME reactor, and methanol reactor for the equilibration
 function to determine steady state solution of reactor network.
 """
 import numpy as np
-from scipy.optimize import newton, fsolve
+from scipy.optimize import newton, minimize
 import math
 
 # Methanol reactor model
@@ -16,13 +16,14 @@ def MethanolReactor(inlets, temperature, pressure):
     react_coeff1 = [3, 1]
     prod_ind1 = [3, 4]
     prod_coeff1 = [1, 1]
-    Grxn1 = 0
+    Grxn1 = 17.3 # kJ/mol
     # Rxn 2
     react_ind2 = [0, 1]
     react_coeff2 = [1, 1]
     prod_ind2 = [2, 3]
     prod_coeff2 = [1, 1]
-    Grxn2 = 0
+    Grxn2 = 28.6 # kJ/mol
+
     R = 8.314 # Check units
     # Kps Van't Hoff EQ
     Kp1 = math.exp(-1/R*((Grxn1 - get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1))/298 + get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1)/temperature))
@@ -30,7 +31,7 @@ def MethanolReactor(inlets, temperature, pressure):
     # Total moles in
     n_total = np.sum(list(inlets.values())[0])
     # Solve for extent of reaction
-    extent = fsolve(MeOHRxnFunc, [0.5, 0.5], (n_total, list(inlets.values())[0], pressure, Kp1, Kp2))
+    extent = minimize(MeOHRxnFunc, [0.5, 0.5], (n_total, list(inlets.values())[0], pressure, Kp1, Kp2))
     # Calculate outlet flow rates of reacting species
     new_outlets[0] -= 3*extent[0] + extent[1]  # H2
     new_outlets[1] -= extent[0] + extent[1]    # CO2
@@ -38,7 +39,7 @@ def MethanolReactor(inlets, temperature, pressure):
     new_outlets[3] += extent[0] + extent[1]    # H2O
     new_outlets[4] -= extent[0]                # MeOH
     return new_outlets
-# Helper function to specify nonlinear equations from EQ constants (Use flsove)
+# Helper function to specicfy nonlinear equations from EQ constants (Use flsove)
 def MeOHRxnFunc(extent, n_total, inlets, pressure, Kp1, Kp2):
     return
     [
@@ -83,7 +84,7 @@ def OMEReactor(inlets, temperature, pressure):
     # Total moles in
     n_total = np.sum(list(inlets.values())[0])
     # Solve for extent of reaction
-    extent = fsolve(OMERxnFunc, [0.5, 0.5, 0.5, 0.5, 0.5], (n_total, list(inlets.values())[0], Keq))
+    extent = minimize(OMERxnFunc, [0.5, 0.5, 0.5, 0.5, 0.5], (n_total, list(inlets.values())[0], Keq))
     # Calculate outlet flow rates of reacting species
     new_outlets[3] += extent[0]                # H2O
     new_outlets[4] -= 2*extent[0]              # MeOH

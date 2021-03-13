@@ -51,3 +51,8 @@ if __name__ == "__main__":
 
     for i in range(len(labels)):
         print(labels[i],rel_vol_h20[i])
+
+# Delta G of rxn calculations for methanol reactor (kJ/mol)
+#  CO2:-394.4 H2:0 MeOH:-148.5 H2O:-228.6 CO:-137.2
+# RXN1: 17.3
+# RXN2: 28.6
