@@ -167,7 +167,7 @@ class FlashTank(Component):
             print("vout", self.outlets[self.vapor_out])
             print("lout", self.outlets[self.liquid_out])
             return self.outlets
-        return self.inlets
+        return self.outlets
 
     def temperature_iteration(self, temp_guess):
         alpha = get_psat(temp_guess) / get_psat(temp_guess)[self.ind_key]
@@ -196,7 +196,7 @@ class Adsorber(Component):
 
     def calc_outlets(self):
         flows_in = self.inlets[self.inkey]
-        self.outlets[self.adskey] = flows_in[self.recov_index]*self.recov
+        self.outlets[self.adskey][self.recov_index] = flows_in[self.recov_index]*self.recov
         self.outlets[self.outkey] = flows_in - flows_in[self.recov_index]*self.recov
         return self.outlets
 
@@ -227,7 +227,7 @@ class DistillationColumn(Component):
             self.outlets[self.liquid_out] = b = (
                 1 - xi) * list(self.inlets.values())[0]
             return self.outlets
-        return self.inlets
+        return self.outlets
 
     # Calculate key temperatures
     def calc_bot_temp(self):
@@ -309,7 +309,7 @@ class Absorber(Component):
                     break
             # The liquid component flowrates Solvent (water), FORM and MeOH
             return self.outlets
-        return self.inlets
+        return self.outlets
 
 
 # generate streams with components specified with kwargs
