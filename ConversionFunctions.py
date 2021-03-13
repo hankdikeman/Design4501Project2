@@ -12,7 +12,6 @@ from thermoutils import get_HRxn
 def MethanolReactor(inlets, temperature, pressure):
     # Make outlet array
     new_outlets = np.copy(inlets)
-
     # Rxn 1
     react_ind1 = [0, 1]
     react_coeff1 = [3, 1]
@@ -34,10 +33,9 @@ def MethanolReactor(inlets, temperature, pressure):
     n_total = np.sum(new_outlets)
     # Solve for extent of reaction
     opt_result = minimize(MeOHRxnFunc, (0.5, 0.5), (n_total, new_outlets, pressure, K1, K2))
-    if not opt_result['success']:
-        raise ValueError('MeOH minimization function did not converge')
+    # if not opt_result['success']:
+    #    raise ValueError('MeOH minimization function did not converge')
     extent = opt_result['x']
-    print('extent',extent)
     # Calculate outlet flow rates of reacting species
     new_outlets[0] -= (3*extent[0] + extent[1])  # H2
     new_outlets[1] -= extent[0] + extent[1]    # CO2
@@ -93,8 +91,8 @@ def OMEReactor(inlets, temperature, pressure):
     # Solve for extent of reaction
     print(n_total, new_outlets, Keq)
     opt_result = minimize(OMERxnFunc, [0.5, 0.5, 0.5, 0.5, 0.5, 0.5], (n_total, new_outlets, Keq))
-    if not opt_result['success']:
-        raise ValueError('MeOH minimization function did not converge')
+    # if not opt_result['success']:
+    #    raise ValueError('MeOH minimization function did not converge')
     extent = opt_result['x']
     # Calculate outlet flow rates of reacting species
     new_outlets[3] += extent[0]                # H2O

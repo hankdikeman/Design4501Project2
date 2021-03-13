@@ -34,10 +34,6 @@ class Network:
             # merge current inlets dict
             next_inlets = {**(self.component_set[component].calc_outlets()), **next_inlets}
             current_inlets = {**(self.component_set[component].get_inlets()), **current_inlets}
-        print('\nNext Inlets:')
-        pprint.pprint(next_inlets)
-        print('\nCurrent Inlets:')
-        pprint.pprint(current_inlets)
         # use intersection of dictionary keysets to avoid key error
         # feed and outlets will not be iterated in this set-up (might need to be changed)
         iterable_streams = current_inlets.keys() & next_inlets.keys()
@@ -52,7 +48,7 @@ class Network:
                 for inflow in (inlets.keys() & iterable_streams):
                     inlets[inflow] = np.array(inlets[inflow] + self.LEARNING_PARAM * \
                         (next_inlets[inflow] - inlets[inflow]))
-                    print(inlets[inflow])
+                    pprint.pprint(inlets[inflow])
         return next_inlets
 
     def equilibrate_network(self):

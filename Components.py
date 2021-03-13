@@ -164,8 +164,6 @@ class FlashTank(Component):
             self.outlets[self.vapor_out] = v = xi * list(self.inlets.values())[0]
             self.outlets[self.liquid_out] = l = (
                 1 - xi) * list(self.inlets.values())[0]
-            print("vout", self.outlets[self.vapor_out])
-            print("lout", self.outlets[self.liquid_out])
             return self.outlets
         return self.outlets
 
