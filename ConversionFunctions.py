@@ -24,7 +24,7 @@ def MethanolReactor(inlets, temperature, pressure):
     prod_coeff2 = [1, 1]
     Grxn2 = 28.6 # kJ/mol
 
-    R = 8.314 # Check units
+    R = 8.314/1000 # kJ/(K*mol)
     # Kps Van't Hoff EQ
     Kp1 = math.exp(-1/R*((Grxn1 - get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1))/298 + get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1)/temperature))
     Kp2 = math.exp(-1/R*((Grxn2 - get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2))/298 + get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2)/temperature))
