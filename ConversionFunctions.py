@@ -9,7 +9,7 @@ import math
 
 # Methanol reactor model
 def MethanolReactor(inlets, temperature, pressure):
-    # make outlet array
+    # Make outlet array
     new_outlets = list(inlets.values())[0]
     # Rxn 1
     react_ind1 = [0, 1]
@@ -48,6 +48,8 @@ def MeOHRxnFunc(extent, n_total, inlets, pressure, Kp1, Kp2):
 
 # Formaldehyde reactor model
 def FormaldehydeReactor(inlets, temperature, pressure):
+    # Make outlet array
+    new_outlets = list(inlets.values())[0]
     # Kp with memo2 equation
     Kp = np.power(10, ((-1.4722E-8)*temperature**3 + (5.2525E-5)*temperature**2 + (-6.889E-2)*temperature + 43))
     # Total moles in
@@ -55,11 +57,11 @@ def FormaldehydeReactor(inlets, temperature, pressure):
     # Solve for extent of reaction
     extent = newton(FormRxnFunc, 0.5, (n_total, list(inlets.values())[0], pressure, Kp))
     # Calculate outlet flow rates of reacting species
-    list(inlets.values())[0][3] += extent       # H2O
-    list(inlets.values())[0][4] -= extent       # MeOH
-    list(inlets.values())[0][5] += extent       # FA
-    list(inlets.values())[0][7] -= 0.5*extent   # O2
-    return inlets
+    new_outlets[3] += extent       # H2O
+    new_outlets[4] -= extent       # MeOH
+    new_outlets[5] += extent       # FA
+    new_outlets[7] -= 0.5*extent   # O2
+    return new_outlets
 # Helper function to specify nonlinear equation from EQ constants (Use newton)
 def FormRxnFunc(extent, n_total, inlets, pressure, Kp):
     Kp_guess = (extent*(inlets[3]-extent)*n_total**(-0.5))/((inlets[4]-extent)*(inlets[7]-0.5*extent))**(0.5)*(pressure/760)**(0.5)
@@ -67,6 +69,8 @@ def FormRxnFunc(extent, n_total, inlets, pressure, Kp):
 
 # OME reactor model
 def OMEReactor(inlets, temperature, pressure):
+    # Make outlet array
+    new_outlets = list(inlets.values())[0]
     # Constants for equilibrium constant correlations (Rxns 1-7)
     rxnConstA = np.array([-1.9020, 0.8147, -2.454, -2.454, -2.454, -2.454, -2.454])
     rxnConstB = np.array([3512, 240.25, 3029.6, 3029.6, 3029.6, 3029.6, 3029.6])
@@ -81,16 +85,16 @@ def OMEReactor(inlets, temperature, pressure):
     # Solve for extent of reaction
     extent = fsolve(OMERxnFunc, [0.5, 0.5, 0.5, 0.5, 0.5], (n_total, list(inlets.values())[0], Keq))
     # Calculate outlet flow rates of reacting species
-    list(inlets.values())[0][3] += extent[0]                # H2O
-    list(inlets.values())[0][4] -= 2*extent[0]              # MeOH
-    list(inlets.values())[0][5] -= extent[0]                # form
-    list(inlets.values())[0][8] += extent[0] - extent[1]    # OME1, etc
-    list(inlets.values())[0][9] += extent[1] - extent[2]
-    list(inlets.values())[0][10] += extent[2] - extent[3]
-    list(inlets.values())[0][11] += extent[3] - extent[4]
-    list(inlets.values())[0][12] += extent[4] - extent[5]
-    list(inlets.values())[0][13] += extent[6]
-    return inlets
+    new_outlets[3] += extent[0]                # H2O
+    new_outlets[4] -= 2*extent[0]              # MeOH
+    new_outlets[5] -= extent[0]                # form
+    new_outlets[8] += extent[0] - extent[1]    # OME1, etc
+    new_outlets[9] += extent[1] - extent[2]
+    new_outlets[10] += extent[2] - extent[3]
+    new_outlets[11] += extent[3] - extent[4]
+    new_outlets[12] += extent[4] - extent[5]
+    new_outlets[13] += extent[6]
+    return new_outlets
 # Helper function to specify nonlinear equations from EQ constants (Use flsove)
 def OMERxnFunc(extent, n_total, inlets, Keq):
     # Nomenclature: extents[0:5]~[A:F], Keq[0:5]~[A:F]
