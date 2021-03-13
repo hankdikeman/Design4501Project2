@@ -31,22 +31,26 @@ class Network:
         next_inlets = {}
         # loop through components and store inlets in dictionary
         for component in self.component_set.keys():
-            print(component)
-            print(self.component_set[component])
-            print(self.component_set[component].calc_outlets())
             # merge current inlets dict
+            print(component, 'Calc Outlets')
+            pprint.pprint({**(self.component_set[component].calc_outlets())}
             next_inlets = {**(self.component_set[component].calc_outlets()), **next_inlets}
             current_inlets = {**(self.component_set[component].get_inlets()), **current_inlets}
+        print('\nNext Inlets:')
+        pprint.pprint(next_inlets)
+        print('\nCurrent Inlets:')
+        pprint.pprint(current_inlets)
         # use intersection of dictionary keysets to avoid key error
         # feed and outlets will not be iterated in this set-up (might need to be changed)
         iterable_streams = current_inlets.keys() & next_inlets.keys()
+        print('\n\nIterable streams')
+        pprint.pprint(iterable_streams)
         # loop through components
         for component in self.component_set.keys():
             # check if component is fixed
             if not self.component_set[component].is_fixed():
                 # get inlet streams of component
                 inlets = self.component_set[component].get_inlets()
-                pprint.pprint(inlets)
                 for inflow in (inlets.keys() & iterable_streams):
                     inlets[inflow] = inlets[inflow] - self.LEARNING_PARAM * \
                         (next_inlets[inflow] - inlets[inflow])
