@@ -35,13 +35,10 @@ def get_tsat(psat):
     return B / (A - np.log(psat)) - C
 
 # get heat of reaction
-
-
 def get_HRxn():
     return 0
+
 # get gibbs free energy of reaction
-
-
 def get_GRxn():
     return 0
 
