@@ -4,8 +4,8 @@ bubble point, enthalpies, etc
 """
 import numpy as np
 
-labels = ['H2', 'CO2', 'CO', 'H2O', 'MEOH', 'FA', 'N2',
-          'O2', 'OME1', 'OME2', 'OME3', 'OME4', 'OME5', 'OME6']
+labels = ['H2-0', 'CO2-1', 'CO-2', 'H2O-3', 'MEOH-4', 'FA-5', 'N2-6',
+          'O2-7', 'OME1-8', 'OME2-9', 'OME3-10', 'OME4-11', 'OME5-12', 'OME6-13']
 
 # Antoinne Coeff.
 A = np.array([13.6333, 22.5898, 14.3686, 18.3036, 18.5875, 16.4775, 14.9342,

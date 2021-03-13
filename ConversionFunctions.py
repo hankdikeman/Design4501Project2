@@ -33,10 +33,10 @@ def MethanolReactor(inlets, temperature, pressure):
     extent = fsolve(MeOHRxnFunc, [0.5, 0.5], (n_total, list(inlets.values())[0], pressure, Kp1, Kp2))
     # Calculate outlet flow rates of reacting species
     new_outlets[0] -= 3*extent[0] + extent[1]  # H2
-    list(inlets.values())[0][1] -= extent[0] + extent[1]    # CO2
-    list(inlets.values())[0][2] += extent[1]                # CO
-    list(inlets.values())[0][3] += extent[0] + extent[1]    # H2O
-    list(inlets.values())[0][4] -= extent[0]                # MeOH
+    new_outlets[1] -= extent[0] + extent[1]    # CO2
+    new_outlets[2] += extent[1]                # CO
+    new_outlets[3] += extent[0] + extent[1]    # H2O
+    new_outlets[4] -= extent[0]                # MeOH
     return new_outlets
 # Helper function to specify nonlinear equations from EQ constants (Use flsove)
 def MeOHRxnFunc(extent, n_total, inlets, pressure, Kp1, Kp2):
