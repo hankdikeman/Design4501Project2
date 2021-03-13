@@ -29,7 +29,7 @@ if __name__ == "__main__":
     # methanol reactor
     TEMP_MEOH = 573
     PRESS_MEOH = 37500
-    r1inlets = {'m11': StreamGen()}
+    r1inlets = {'m11': StreamGen(CO2 = 5, H2 = 5, MEOH = 5, H2O=5, CO=5)}
     r1outlets = {'r11': StreamGen()}
     net1.add_component('R1', Reactor(TEMP_MEOH, PRESS_MEOH,
                                      r1inlets, r1outlets, MethanolReactor))

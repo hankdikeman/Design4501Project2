@@ -40,10 +40,10 @@ def get_HRxn(reactant_indexs, reactant_coeff, product_indexs, product_coeff):
     product_sum = 0
     # Sum reactant heat of formations with coeff
     for i in range(len(reactant_indexs)):
-        reactant_sum += reactant_coeff[i]*Hf[reactant_index[i]]
+        reactant_sum += reactant_coeff[i]*Hf[reactant_indexs[i]]
     # Sum product heat of formations with coeff
     for j in range(len(product_indexs)):
-        product_sum += product_coeff[j]*Hf[product_index[j]]
+        product_sum += product_coeff[j]*Hf[product_indexs[j]]
     return (product_sum - reactant_sum)
 
 if __name__ == "__main__":
