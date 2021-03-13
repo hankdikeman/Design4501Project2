@@ -27,7 +27,7 @@ if __name__ == "__main__":
     mix1outlets = {'m11': StreamGen()}
     net1.add_component('M1', Mixer(mix1inlets, mix1outlets))
     # methanol reactor
-    TEMP_MEOH = 573
+    TEMP_MEOH = 673
     PRESS_MEOH = 37500
     r1inlets = {'m11': StreamGen(H2=100, CO2=35, MEOH = 5, H2O=5, CO=5)}
     r1outlets = {'r11': StreamGen()}
@@ -53,7 +53,7 @@ if __name__ == "__main__":
                                        4, f1inlets, f1vaporoutlets, f1liquidoutlets))
     # distillation column for methanol
     DC1_recov = {'HK':(0.99,3),'LK':(0.99,4)}
-    inlets = {'f12': StreamGen(MEOH=15, H20=15)}
+    inlets = {'f12': StreamGen(MEOH=15, H2O=15)}
     v_out = {'dc11': StreamGen()}
     l_out = {'dc12': StreamGen()}
     DC1_TEMP = 350
