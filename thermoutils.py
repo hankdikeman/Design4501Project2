@@ -34,16 +34,17 @@ def get_psat(temperature):
 def get_tsat(psat):
     return B / (A - np.log(psat)) - C
 
-# get heat of reaction
-
-
-def get_HRxn():
-    pass
-# get gibbs free energy of reaction
-
-
-def get_GRxn():
-    pass
+# get heat of reaction (kj/mol)
+def get_HRxn(reactant_indexs, reactant_coeff, product_indexs, product_coeff):
+    reactant_sum = 0
+    product_sum = 0
+    # Sum reactant heat of formations with coeff
+    for i in range(len(reactant_indexs)):
+        reactant_sum += reactant_coeff[i]*Hf[reactant_index[i]]
+    # Sum product heat of formations with coeff
+    for j in range(len(product_indexs)):
+        product_sum += product_coeff[j]*Hf[product_index[j]]
+    return (product_sum - reactant_sum)
 
 if __name__ == "__main__":
     rel_vol_h20 = get_psat(298)/get_psat(298)[3]

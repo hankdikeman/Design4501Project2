@@ -135,7 +135,7 @@ class Reactor(Component):
         super(Reactor, self).__init__(inlets, outlets)
 
     def calc_outlets(self):
-        list(self.outlets.values())[0] = self.conversion_function(
+        self.outlets[list(self.outlets.keys())[0]] = self.conversion_function(
             list(self.inlets.values)[0], self.pressure, self.temperature)
         return self.outlets
 
