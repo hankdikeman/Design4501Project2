@@ -17,7 +17,7 @@ if __name__ == "__main__":
     # make network object
     net1 = Network()
     # feed to reactor
-    i1outlets = {'i1': StreamGen()}
+    i1outlets = {'i1': StreamGen(H2=60, CO2=20)}
     net1.add_component('I1', Feed(i1outlets))
     # mixer for recycle and feed
     mix1inlets = {
@@ -39,7 +39,7 @@ if __name__ == "__main__":
         's11': StreamGen(),
         's12': StreamGen()
     }
-    net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.98, 's11'))
+    net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.5, 's11'))
     # purge outlet
     purge1inlets = {'s12': StreamGen(CO2=1, CO=1, H2=1)}
     net1.add_component('Purge1', Removal(purge1inlets))

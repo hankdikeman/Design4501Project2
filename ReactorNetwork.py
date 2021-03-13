@@ -10,7 +10,7 @@ from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
 
 class Network:
-    LEARNING_PARAM = 0.05
+    LEARNING_PARAM = 0.01
 
     def __init__(self):
         self.component_set = {}
@@ -34,6 +34,11 @@ class Network:
             # merge current inlets dict
             next_inlets = {**(self.component_set[component].calc_outlets()), **next_inlets}
             current_inlets = {**(self.component_set[component].get_inlets()), **current_inlets}
+        # change all negative values to zero
+        for k in current_inlets.keys():
+            current_inlets[k][current_inlets[k]<0] = 0
+        for k in next_inlets.keys():
+            next_inlets[k][next_inlets[k]<0] = 0
         # use intersection of dictionary keysets to avoid key error
         # feed and outlets will not be iterated in this set-up (might need to be changed)
         iterable_streams = current_inlets.keys() & next_inlets.keys()
@@ -57,7 +62,7 @@ class Network:
         # initialize count variable
         n_iter = 0
         # while the network is not marked as equilibrated
-        while not self.equilibrated:
+        while not self.equilibrated and n_iter < 10000:
             print("Iteration ", n_iter)
             # call iteration function
             next_inlets = self.iterate_network()
