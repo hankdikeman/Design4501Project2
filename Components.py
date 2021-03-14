@@ -36,7 +36,7 @@ class Component(metaclass=ABCMeta):
             print('inflow label:',inflow)
             previous = self.inlets[inflow]
             iterated = next_inlets[inflow]
-            if np.linalg.norm(previous - iterated) > 1E-9:
+            if np.linalg.norm(previous - iterated) > 1E-4:
                 return False
         return True
 
@@ -201,8 +201,8 @@ class Adsorber(Component):
         self.outlets[self.outkey] = 0.98 * (flows_in)
         self.outlets[self.adskey] = 0.02 * (flows_in)
         # split water flow
-        self.outlets[self.outkey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.05
-        self.outlets[self.adskey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.95
+        self.outlets[self.outkey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.01
+        self.outlets[self.adskey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.99
         # print out stream compositions
         print('adin', self.inlets[self.inkey])
         print('adprod', self.outlets[self.outkey])
@@ -330,7 +330,7 @@ class Absorber(Component):
 
 # generate streams with components specified with kwargs
 def StreamGen(H2=0, CO2=0, CO=0, H2O=0, MEOH=0, FA=0, N2=0, O2=0, OME1=0, OME2=0, OME3=0, OME4=0, OME5=0, OME6=0):
-    return np.array([H2, CO2, CO, H2O, MEOH, FA, N2, O2, OME1, OME2, OME3, OME4, OME5, OME6])
+    return np.array([H2, CO2, CO, H2O, MEOH, FA, N2, O2, OME1, OME2, OME3, OME4, OME5, OME6], dtype=np.float64)
 
 
 # unit tests for components

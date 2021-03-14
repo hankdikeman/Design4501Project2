@@ -47,7 +47,7 @@ if __name__ == "__main__":
     f1inlets = {'r11': StreamGen(CO2=20, H2=60, MEOH=15, H2O=15, CO=5)}
     f1vaporoutlets = {'f11': StreamGen()}
     f1liquidoutlets = {'f12': StreamGen()}
-    f1recovery = {'Key': (0.005, 4)}
+    f1recovery = {'Key': (0.0005, 4)}
     F1PRESS = 760
     net1.add_component('F1', FlashTank(F1PRESS, f1recovery,
                                        4, f1inlets, f1vaporoutlets, f1liquidoutlets))
@@ -106,19 +106,19 @@ if __name__ == "__main__":
     # OME + methanol mixer
     mix3inlets = {
         'a12': StreamGen(FA=10, H2O=15),
-        'dc21': StreamGen(OME1= 5, OME2=5, MEOH=35, FA=70, H2O=15)
+        'dc21': StreamGen(MEOH=10, FA=20, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)
     }
     mix3outlets = {'m31': StreamGen()}
     net1.add_component('M3', Mixer(mix3inlets, mix3outlets))
     # recycle + OME + methanol mixer
     mix4inlets = {
-        'ad11': StreamGen(OME1=5, OME2=5, FA=60, MEOH=30),
+        'ad11': StreamGen(MEOH=10, FA=20, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1),
         's22': StreamGen(MEOH=5)
     }
     mix4outlets = {'m41': StreamGen()}
     net1.add_component('M4', Mixer(mix4inlets, mix4outlets))
     # OME reactor
-    r3inlets = {'m41': StreamGen(OME1= 5, OME2=5, MEOH=35, FA=70, H2O=15)}
+    r3inlets = {'m41': StreamGen(MEOH=10, FA=20, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)}
     r3outlets = {'r31': StreamGen()}
     TEMP_OME = 350
     PRESS_OME = 760
@@ -126,7 +126,7 @@ if __name__ == "__main__":
                                      r3inlets, r3outlets, OMEReactor))
     # OME column
     DC2_recov = {'HK':(0.01,10),'LK':(0.99,9)}
-    inletsdc2 = {'r31': StreamGen(OME1= 5, OME2=5, OME3=5, OME4=5, OME5=5, OME6=5, MEOH=35, FA=70, H2O=15)}
+    inletsdc2 = {'r31': StreamGen(MEOH=10, FA=20, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)}
     v_outdc2 = {'dc21': StreamGen()}
     l_outdc2 = {'dc22': StreamGen()}
     DC2_TEMP = 353
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     productinlet  = {'dc22': StreamGen(OME3=5, OME4=5, OME5=5, OME6=5)}
     net1.add_component('ProductOutlet', ProductRemoval(productinlet))
     # water adsorber
-    ad_in = {'m31': StreamGen(OME1= 5, OME2=5, MEOH=35, FA=70, H2O=15)}
+    ad_in = {'m31': StreamGen(MEOH=10, FA=20, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)}
     adwater_out = {'ad12': StreamGen()}
     adprod_out = {'ad11': StreamGen()}
     ad_recov = 1

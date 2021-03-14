@@ -4,7 +4,8 @@ formaldehyde reactor, OME reactor, and methanol reactor for the equilibration
 function to determine steady state solution of reactor network.
 """
 import numpy as np
-from scipy.optimize import newton, minimize, Bounds, fsolve
+from numpy.random import rand
+from scipy.optimize import newton, minimize, Bounds, fsolve, brute, differential_evolution, basinhopping
 import math
 from thermoutils import get_HRxn
 
@@ -35,8 +36,6 @@ def MethanolReactor(inlets, temperature, pressure):
     n_total = np.sum(new_outlets)
     # Solve for extent of reaction
     opt_result = minimize(MeOHRxnFunc, (0.5, 0.5), (n_total, new_outlets, pressure, K1, K2))
-    # if not opt_result['success']:
-    #    raise ValueError('MeOH minimization function did not converge')
     extent = opt_result['x']
     # Calculate outlet flow rates of reacting species
     new_outlets[0] -= (3*extent[0] + extent[1])  # H2
@@ -90,56 +89,49 @@ def OMEReactor(inlets, temperature, pressure):
     # Adjust K for combination of rxns 1 + 2
     Ka = K[0]*K[1]
     Keq = K[2:7] # Slicing Ks 3-7 out of initial K array
-    Keq = np.insert(Keq, 0, Ka, axis=0) # Double check correct syntax
+    Keq = np.append(Ka, Keq) # Double check correct syntax
     # Total moles in
     n_total = np.sum(new_outlets)
     print('\n\n\n\nnew outlets:',new_outlets)
     print('Keq',Keq)
-    # Solve for extent of reaction
-    opt_result = minimize(OMERxnFunc, np.array([2.9,2.3,1.6,1.3,1.3,1.2]), (n_total, new_outlets, Keq), method='SLSQP', bounds=Bounds([0,0,0,0,0,0],[n_total,n_total,n_total,n_total,n_total,n_total]))
-    # if not opt_result['success']:
-    #     raise ValueError('OME minimization function did not converge')
+    # Solve for extent of reaction with basinhopping algorithm and BFGS
+    minimizer_kwargs = {"method": "BFGS",'args': (n_total, new_outlets, Keq)}
+    opt_result = basinhopping(OMERxnFunc, np.array([8,5,3,2,1,0.5]), minimizer_kwargs=minimizer_kwargs)
     extent = opt_result['x']
-    print('DID OME CONVERGE??')
-    print('Should be zero')
+    print('extent',extent)
+    print('msg:',opt_result['message'])
+    print('\n\nDID OME CONVERGE??')
+    print('Should be zero:')
     print(OMERxnFunc(extent, n_total, new_outlets, Keq))
     # Calculate outlet flow rates of reacting species
     new_outlets[3] += extent[0]                # H2O
     new_outlets[4] -= 2*extent[0]              # MeOH
-    new_outlets[5] -= extent[0]                # form
+    new_outlets[5] -= np.sum(extent)               # form
     new_outlets[8] += extent[0] - extent[1]    # OME1, etc
     new_outlets[9] += extent[1] - extent[2]
     new_outlets[10] += extent[2] - extent[3]
     new_outlets[11] += extent[3] - extent[4]
     new_outlets[12] += extent[4] - extent[5]
     new_outlets[13] += extent[5]
+    print('new outlets',new_outlets)
     return new_outlets
 # Helper function to specify nonlinear equations from EQ constants (Use flsove)
-def OMERxnFunc(extent_tup, n_total, inlets, Keq):
+def OMERxnFunc(extent_tup, n_tot, inlets, Keq):
     # Nomenclature: extents[0:5]~[A:F], Keq[0:5]~[A:F]
     extent = [extent_tup[0], extent_tup[1], extent_tup[2], extent_tup[3], extent_tup[4], extent_tup[5]]
+    # adjust n_total
+    n_total = n_tot - np.sum(extent)
+    # calculate extents of reaction
     extent_calc = np.array([
-    ((inlets[8]+extent[0]-extent[1]) * (inlets[3]+extent[0]) * n_total) / ((inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]) * (inlets[4]-2*extent[0])**2)-Keq[0],
+    ((inlets[8]+extent[0]-extent[1]) * (inlets[3]+extent[0]) * n_total) / ((inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]) * np.power(inlets[4]-2*extent[0],2))-Keq[0],
     ((inlets[9]+extent[1]-extent[2]) * n_total) / ((inlets[8]+extent[0]-extent[1]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[1],
     ((inlets[10]+extent[2]-extent[3]) * n_total) / ((inlets[9]+extent[1]-extent[2]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[2],
     ((inlets[11]+extent[3]-extent[4]) * n_total) / ((inlets[10]+extent[2]-extent[3]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[3],
     ((inlets[12]+extent[4]-extent[5]) * n_total) / ((inlets[11]+extent[3]-extent[4]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[4],
     ((inlets[13]+extent[5]) * n_total) / ((inlets[12]+extent[4]-extent[5]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[5]
     ])
+    # return the mean squared error
     return np.sum(np.power(extent_calc,2))
 
-# # def OMERxnDer(extent, n_total, inlets, Keq):
-#     # calculate deriv of extent 1
-#     x = extent[0]
-#     a = inlets[8] - extent[1]
-#     b = inlets[3]
-#     c = inlets[5]  - np.sum(extent(
-#     return Jacobian(lambda x: OMERxnFunc(x, n_total, inlets, Keq))(x).ravel()
-# 
-# def OMERxnHess(x, n_total, inlets, Keq):
-#     return Hessian(lambda x: OMERxnFunc(x, n_total, inlets, Keq))(x)
-# 
-# 
-# 
 # labels = ['H2-0', 'CO2-1', 'CO-2', 'H2O-3', 'MEOH-4', 'FA-5', 'N2-6',
 #           'O2-7', 'OME1-8', 'OME2-9', 'OME3-10', 'OME4-11', 'OME5-12', 'OME6-13']
