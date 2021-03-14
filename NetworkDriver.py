@@ -68,7 +68,7 @@ if __name__ == "__main__":
         's21': StreamGen(),
         's22': StreamGen()
     }
-    net1.add_component('S2', Splitter(s2inlets, s2outlets, 0.666, 's21'))
+    net1.add_component('S2', Splitter(s2inlets, s2outlets, 0.55, 's21'))
     # air inlet
     i2outlets = {'i2': StreamGen(O2=10, N2=40)}
     net1.add_component('I2', Feed(i2outlets))
@@ -105,15 +105,15 @@ if __name__ == "__main__":
     net1.add_component('AirR1', Removal(airinlet))
     # OME + methanol mixer
     mix3inlets = {
-        'ad11': StreamGen(OME1=5, OME2=5, FA=60, MEOH=30),
-        's22': StreamGen(MEOH=5)
+        'a12': StreamGen(FA=10, H2O=15),
+        'dc21': StreamGen(OME1= 5, OME2=5, MEOH=35, FA=70, H2O=15)
     }
     mix3outlets = {'m31': StreamGen()}
     net1.add_component('M3', Mixer(mix3inlets, mix3outlets))
     # recycle + OME + methanol mixer
     mix4inlets = {
-        'm31': StreamGen(),
-        'a12': StreamGen(FA=10, H2O=15)
+        'ad11': StreamGen(OME1=5, OME2=5, FA=60, MEOH=30),
+        's22': StreamGen(MEOH=5)
     }
     mix4outlets = {'m41': StreamGen()}
     net1.add_component('M4', Mixer(mix4inlets, mix4outlets))
@@ -129,14 +129,14 @@ if __name__ == "__main__":
     inletsdc2 = {'r31': StreamGen(OME1= 5, OME2=5, OME3=5, OME4=5, OME5=5, OME6=5, MEOH=35, FA=70, H2O=15)}
     v_outdc2 = {'dc21': StreamGen()}
     l_outdc2 = {'dc22': StreamGen()}
-    DC2_TEMP = 80
+    DC2_TEMP = 353
     DC2_PRESS = 760 * 2
     net1.add_component('DC2', DistillationColumn(DC2_TEMP, DC2_PRESS, DC2_recov, inletsdc2, v_outdc2, l_outdc2))
     # product outlet
     productinlet  = {'dc22': StreamGen(OME3=5, OME4=5, OME5=5, OME6=5)}
     net1.add_component('ProductOutlet', ProductRemoval(productinlet))
     # water adsorber
-    ad_in = {'dc21': StreamGen(OME1= 5, OME2=5, MEOH=35, FA=70, H2O=15)}
+    ad_in = {'m31': StreamGen(OME1= 5, OME2=5, MEOH=35, FA=70, H2O=15)}
     adwater_out = {'ad12': StreamGen()}
     adprod_out = {'ad11': StreamGen()}
     ad_recov = 1

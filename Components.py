@@ -194,8 +194,19 @@ class Adsorber(Component):
 
     def calc_outlets(self):
         flows_in = self.inlets[self.inkey]
-        self.outlets[self.adskey][self.recov_index] = flows_in[self.recov_index]*self.recov
-        self.outlets[self.outkey] = flows_in - flows_in[self.recov_index]*self.recov
+        # initialize streams to all zero
+        self.outlets[self.adskey] = np.zeros_like(self.inlets[self.inkey], dtype=np.float64)
+        self.outlets[self.outkey] = np.zeros_like(self.inlets[self.inkey], dtype=np.float64)
+        # split non-water flows
+        self.outlets[self.outkey] = 0.98 * (flows_in)
+        self.outlets[self.adskey] = 0.02 * (flows_in)
+        # split water flow
+        self.outlets[self.outkey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.05
+        self.outlets[self.adskey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.95
+        # print out stream compositions
+        print('adin', self.inlets[self.inkey])
+        print('adprod', self.outlets[self.outkey])
+        print('adwater', self.outlets[self.adskey])
         return self.outlets
 
 class DistillationColumn(Component):

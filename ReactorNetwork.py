@@ -62,7 +62,7 @@ class Network:
         # initialize count variable
         n_iter = 0
         # while the network is not marked as equilibrated
-        while not self.equilibrated and n_iter < 10000:
+        while not self.equilibrated and n_iter < 1000:
             print("Iteration ", n_iter)
             # call iteration function
             next_inlets = self.iterate_network()
@@ -71,6 +71,7 @@ class Network:
             for component in self.component_set:
                 if not self.component_set[component].is_fixed():
                     print('Checked Component:',self.component_set[component])
+                    print(self.component_set[component].check_solution(next_inlets))
                     self.equilibrated &= self.component_set[component].check_solution(
                         next_inlets)
             print(self.equilibrated)
