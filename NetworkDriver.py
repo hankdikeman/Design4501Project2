@@ -39,7 +39,7 @@ if __name__ == "__main__":
         's11': StreamGen(),
         's12': StreamGen()
     }
-    net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.8, 's11'))
+    net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.98, 's11'))
     # purge outlet
     purge1inlets = {'s12': StreamGen(CO2=1, CO=1, H2=1)}
     net1.add_component('Purge1', Removal(purge1inlets))
