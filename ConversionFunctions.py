@@ -27,8 +27,10 @@ def MethanolReactor(inlets, temperature, pressure):
 
     R = 8.314/1000 # kJ/(K*mol)
     # Kps Van't Hoff EQ
-    K1 = math.exp(-1/R*(((Grxn1 - get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1))/298 + get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1)/temperature)))
-    K2 = math.exp(-1/R*(((Grxn2 - get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2))/298 + get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2)/temperature)))
+    # K1 = math.exp(-1/R*(((Grxn1 - get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1))/298 + get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1)/temperature)))
+    # K2 = math.exp(-1/R*(((Grxn2 - get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2))/298 + get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2)/temperature)))
+    K1 = math.exp(-Grxn1/(R*temperature))
+    K2 = math.exp(-Grxn2/(R*temperature))
     print("K values", K1, K2)
     print(get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1))
     print(get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2))
@@ -41,9 +43,9 @@ def MethanolReactor(inlets, temperature, pressure):
     extent = opt_result['x']
     # Calculate outlet flow rates of reacting species
     new_outlets[0] -= (3*extent[0] + extent[1])  # H2
-    new_outlets[1] -= extent[0] + extent[1]    # CO2
+    new_outlets[1] -= (extent[0] + extent[1])    # CO2
     new_outlets[2] += extent[1]                # CO
-    new_outlets[3] += extent[0] + extent[1]    # H2O
+    new_outlets[3] += (extent[0] + extent[1])    # H2O
     new_outlets[4] += extent[0]                # MeOH
     return new_outlets
 # Helper function to specicfy nonlinear equations from EQ constants (Use flsove)
