@@ -39,7 +39,7 @@ if __name__ == "__main__":
         's11': StreamGen(),
         's12': StreamGen()
     }
-    net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.5, 's11'))
+    net1.add_component('S1', Splitter(s1inlets, s1outlets, 0.8, 's11'))
     # purge outlet
     purge1inlets = {'s12': StreamGen(CO2=1, CO=1, H2=1)}
     net1.add_component('Purge1', Removal(purge1inlets))
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     net1.add_component('F1', FlashTank(F1PRESS, f1recovery,
                                        4, f1inlets, f1vaporoutlets, f1liquidoutlets))
     # distillation column for methanol
-    DC1_recov = {'HK':(0.99,3),'LK':(0.99,4)}
+    DC1_recov = {'HK':(0.01,3),'LK':(0.99,4)}
     inlets = {'f12': StreamGen(MEOH=15, H2O=15)}
     v_out = {'dc11': StreamGen()}
     l_out = {'dc12': StreamGen()}
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     net1.add_component('R2', Reactor(TEMP_FA, PRESS_FA,
                                      r2inlets, r2outlets, FormaldehydeReactor))
     # water inlet
-    i3outlets = {'i3': StreamGen(H2O=50)}
+    i3outlets = {'i3': StreamGen(H2O=2)}
     net1.add_component('I3', Feed(i3outlets))
     # formaldehyde absorber
     vinabs = {'r21': StreamGen(FA=10, O2=5, N2=40, H2O=10)}
@@ -125,7 +125,7 @@ if __name__ == "__main__":
     net1.add_component('R3', Reactor(TEMP_OME, PRESS_OME,
                                      r3inlets, r3outlets, OMEReactor))
     # OME column
-    DC2_recov = {'HK':(0.99,10),'LK':(0.99,9)}
+    DC2_recov = {'HK':(0.01,10),'LK':(0.99,9)}
     inletsdc2 = {'r31': StreamGen(OME1= 5, OME2=5, OME3=5, OME4=5, OME5=5, OME6=5, MEOH=35, FA=70, H2O=15)}
     v_outdc2 = {'dc21': StreamGen()}
     l_outdc2 = {'dc22': StreamGen()}

@@ -10,7 +10,7 @@ from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
 
 class Network:
-    LEARNING_PARAM = 0.01
+    LEARNING_PARAM = 0.75
 
     def __init__(self):
         self.component_set = {}
