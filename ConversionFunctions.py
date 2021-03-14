@@ -31,9 +31,6 @@ def MethanolReactor(inlets, temperature, pressure):
     # K2 = math.exp(-1/R*(((Grxn2 - get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2))/298 + get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2)/temperature)))
     K1 = math.exp(-Grxn1/(R*temperature))
     K2 = math.exp(-Grxn2/(R*temperature))
-    print("K values", K1, K2)
-    print(get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1))
-    print(get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2))
     # Total moles in
     n_total = np.sum(new_outlets)
     # Solve for extent of reaction
@@ -62,12 +59,15 @@ def FormaldehydeReactor(inlets, temperature, pressure):
     # Make outlet array
     new_outlets = np.copy(inlets)
     # Kp with memo2 equation
-    Kp = np.power(10, ((-1.4722E-8)*temperature**3 + (5.2525E-5)*temperature**2 + (-6.889E-2)*temperature + 43))
-    # Total moles in
-    n_total = np.sum(new_outlets)
+    # Kp = np.power(10, ((-1.4722E-8)*temperature**3 + (5.2525E-5)*temperature**2 + (-6.889E-2)*temperature + 43))
+    # print("K val: ", Kp)
+    # # Total moles in
+    # n_total = np.sum(new_outlets)
     # Solve for extent of reaction
-    opt_result = minimize(FormRxnFunc, 0.5, (n_total, new_outlets, pressure, Kp))
-    extent = opt_result['x']
+    # opt_result = minimize(FormRxnFunc, 5, (n_total, new_outlets, pressure, Kp))
+    # extent = opt_result['x']
+    # print(opt_result)
+    extent = new_outlets[4]
     # Calculate outlet flow rates of reacting species
     new_outlets[3] += extent       # H2O
     new_outlets[4] -= extent       # MeOH
@@ -75,8 +75,8 @@ def FormaldehydeReactor(inlets, temperature, pressure):
     new_outlets[7] -= 0.5*extent   # O2
     return new_outlets
 # Helper function to specify nonlinear equation from EQ constants (Use newton)
-def FormRxnFunc(extent, n_total, inlets, pressure, Kp):
-    return np.power((extent*(inlets[3]-extent)*n_total**(-0.5))/((inlets[4]-extent)*(inlets[7]-0.5*extent))**(0.5)*(pressure/760)**(0.5)-Kp, 2)
+# def FormRxnFunc(extent, n_total, inlets, pressure, Kp):
+#     return np.power((extent*(inlets[3]-extent)*n_total**(-0.5))/((inlets[4]-extent)*(inlets[7]-0.5*extent))**(0.5)*(pressure/760)**(0.5)-Kp, 2)
 
 # OME reactor model
 def OMEReactor(inlets, temperature, pressure):
