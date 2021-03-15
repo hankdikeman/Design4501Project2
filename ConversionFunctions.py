@@ -82,6 +82,8 @@ def OMEReactor(inlets, temperature, pressure):
     # Make outlet array
     new_outlets = np.copy(inlets)
     # Constants for equilibrium constant correlations (Rxns 1-7)
+    global OME_inflows
+    OME_inflows = inlets
     rxnConstA = np.array([-1.9020, 0.8147, -2.454, -2.454, -2.454, -2.454, -2.454])
     rxnConstB = np.array([3512, 240.25, 3029.6, 3029.6, 3029.6, 3029.6, 3029.6])
     # Initial EQ constants
@@ -96,7 +98,7 @@ def OMEReactor(inlets, temperature, pressure):
     print('Keq',Keq)
     # Solve for extent of reaction with basinhopping algorithm and BFGS
     minimizer_kwargs = {"method": "BFGS",'args': (n_total, new_outlets, Keq)}
-    opt_result = basinhopping(OMERxnFunc, np.array([8,5,3,2,1,0.5]), minimizer_kwargs=minimizer_kwargs)
+    opt_result = basinhopping(OMERxnFunc, np.array([20,20,20,20,20,20], dtype=np.float64), niter=100,T=2,minimizer_kwargs=minimizer_kwargs, accept_test=OMEAccept)
     extent = opt_result['x']
     print('extent',extent)
     print('msg:',opt_result['message'])
@@ -114,6 +116,8 @@ def OMEReactor(inlets, temperature, pressure):
     new_outlets[12] += extent[4] - extent[5]
     new_outlets[13] += extent[5]
     print('new outlets',new_outlets)
+    print('sumoldmoles',np.sum(inlets))
+    print('sumnewmoles',np.sum(new_outlets)+np.sum(extent))
     return new_outlets
 # Helper function to specify nonlinear equations from EQ constants (Use flsove)
 def OMERxnFunc(extent_tup, n_tot, inlets, Keq):
@@ -132,6 +136,24 @@ def OMERxnFunc(extent_tup, n_tot, inlets, Keq):
     ])
     # return the mean squared error
     return np.sum(np.power(extent_calc,2))
+
+def OMEAccept(**kwargs):
+    global OME_inflows
+    extent = kwargs['x_new']
+    rejected = np.any(
+        np.array([
+        OME_inflows[3] + extent[0],
+        OME_inflows[4] - 2*extent[0],              # MeOH
+        OME_inflows[5] - np.sum(extent),               # form
+        OME_inflows[8] + extent[0] - extent[1],    # OME1, etc
+        OME_inflows[9] + extent[1] - extent[2],
+        OME_inflows[10] + extent[2] - extent[3],
+        OME_inflows[11] + extent[3] - extent[4],
+        OME_inflows[12] + extent[4] - extent[5],
+        OME_inflows[13] + extent[5]
+        ]) < 0
+        )
+    return not rejected
 
 # labels = ['H2-0', 'CO2-1', 'CO-2', 'H2O-3', 'MEOH-4', 'FA-5', 'N2-6',
 #           'O2-7', 'OME1-8', 'OME2-9', 'OME3-10', 'OME4-11', 'OME5-12', 'OME6-13']
