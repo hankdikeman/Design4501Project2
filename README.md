@@ -13,5 +13,6 @@ Program Dependencies:
 Python:     3.8.5<=
 Numpy:      1.20.1<=
 Sympy:      1.7.1<=
+Scipy:      1.6.1<=
 
 note: it is likely that backwards compatability with older package versions exists, but these are the versions known to work with the current version of the simulation
