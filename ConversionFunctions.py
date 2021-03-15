@@ -112,13 +112,14 @@ def OMEReactor(inlets, temperature, pressure):
     opt_result = root(OMERxnFunc, OME_lastextent, (n_total, new_outlets, Keq), method='lm', jac=OMEJacobian) # , bounds=((0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total)))
     # basinhopping(OMERxnFunc, np.array([20,20,20,20,20,20], dtype=np.float64), niter=100,T=2,minimizer_kwargs=minimizer_kwargs, accept_test=OMEAccept)
     extent = opt_result['x']
-    OME_lastextent = extent
     print('-'*100+'\n','new extent value:',extent)
     print('old extent value:', OME_lastextent,'\n'+'-'*100)
     print('\nmsg:',opt_result['message'])
     print('\n\nDID OME CONVERGE??')
     print('Should be zero:')
     print(np.sum(OMERxnFunc(extent, n_total, new_outlets, Keq)))
+    # write new extent to global IC variable
+    OME_lastextent = extent
     # Calculate outlet flow rates of reacting species
     new_outlets[3] += extent[0]                # H2O
     new_outlets[4] -= 2*extent[0]              # MeOH

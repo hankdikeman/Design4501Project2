@@ -36,7 +36,7 @@ class Component(metaclass=ABCMeta):
             print('inflow label:',inflow)
             previous = self.inlets[inflow]
             iterated = next_inlets[inflow]
-            if np.linalg.norm(previous - iterated) > 1E-4:
+            if np.linalg.norm(previous - iterated) > 1E-2:
                 return False
         return True
 
@@ -164,6 +164,12 @@ class FlashTank(Component):
             self.outlets[self.vapor_out] = v = xi * list(self.inlets.values())[0]
             self.outlets[self.liquid_out] = l = (
                 1 - xi) * list(self.inlets.values())[0]
+            # manually remove gas from outlet liquid stream
+            gasinliq = self.outlets[self.liquid_out][0:3]
+            gasingas = self.outlets[self.vapor_out][0:3]
+            # add gas stream to the vapor out stream and set in liq to 0
+            self.outlets[self.liquid_out][0:3] = 0
+            self.outlets[self.vapor_out][0:3] = gasinliq + gasingas
             return self.outlets
         return self.outlets
 
@@ -198,8 +204,8 @@ class Adsorber(Component):
         self.outlets[self.adskey] = np.zeros_like(self.inlets[self.inkey], dtype=np.float64)
         self.outlets[self.outkey] = np.zeros_like(self.inlets[self.inkey], dtype=np.float64)
         # split non-water flows
-        self.outlets[self.outkey] = 0.98 * (flows_in)
-        self.outlets[self.adskey] = 0.02 * (flows_in)
+        self.outlets[self.outkey] = 0.995 * (flows_in)
+        self.outlets[self.adskey] = 0.005 * (flows_in)
         # split water flow
         self.outlets[self.outkey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.01
         self.outlets[self.adskey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.99
