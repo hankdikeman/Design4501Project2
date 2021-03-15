@@ -68,7 +68,7 @@ if __name__ == "__main__":
         's21': StreamGen(),
         's22': StreamGen()
     }
-    net1.add_component('S2', Splitter(s2inlets, s2outlets, 0.55, 's21'))
+    net1.add_component('S2', Splitter(s2inlets, s2outlets, 0.65, 's21'))
     # air inlet
     i2outlets = {'i2': StreamGen(O2=10, N2=40)}
     net1.add_component('I2', Feed(i2outlets))
@@ -118,9 +118,9 @@ if __name__ == "__main__":
     mix4outlets = {'m41': StreamGen()}
     net1.add_component('M4', Mixer(mix4inlets, mix4outlets))
     # OME reactor
-    r3inlets = {'m41': StreamGen(MEOH=10, FA=18, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)}
+    r3inlets = {'m41': StreamGen(MEOH=12, FA=20, H2O=0.1, OME1=1, OME2=1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)}
     r3outlets = {'r31': StreamGen()}
-    TEMP_OME = 350
+    TEMP_OME = 400
     PRESS_OME = 760
     net1.add_component('R3', Reactor(TEMP_OME, PRESS_OME,
                                      r3inlets, r3outlets, OMEReactor))

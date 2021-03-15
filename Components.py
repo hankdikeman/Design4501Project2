@@ -204,9 +204,6 @@ class Adsorber(Component):
         self.outlets[self.outkey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.01
         self.outlets[self.adskey][self.recov_index] = self.inlets[self.inkey][self.recov_index]*0.99
         # print out stream compositions
-        print('adin', self.inlets[self.inkey])
-        print('adprod', self.outlets[self.outkey])
-        print('adwater', self.outlets[self.adskey])
         return self.outlets
 
 class DistillationColumn(Component):

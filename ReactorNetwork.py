@@ -10,7 +10,7 @@ from ConversionFunctions import MethanolReactor, FormaldehydeReactor, OMEReactor
 
 
 class Network:
-    LEARNING_PARAM = 0.1
+    LEARNING_PARAM = 0.15
 
     def __init__(self):
         self.component_set = {}
@@ -62,7 +62,7 @@ class Network:
         # initialize count variable
         n_iter = 0
         # while the network is not marked as equilibrated
-        while not self.equilibrated and n_iter < 3:
+        while not self.equilibrated and n_iter < 3000:
             print("Iteration ", n_iter)
             # call iteration function
             next_inlets = self.iterate_network()

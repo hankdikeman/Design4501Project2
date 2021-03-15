@@ -5,11 +5,10 @@ function to determine steady state solution of reactor network.
 """
 import numpy as np
 from numpy.random import rand
-from scipy.optimize import newton, minimize, Bounds, fsolve, brute, differential_evolution, basinhopping
+from scipy.optimize import newton, minimize, root, Bounds, fsolve, brute, differential_evolution, basinhopping
 import math
 from thermoutils import get_HRxn
-import sympy as sp
-from sympy import jacobian
+import sympy
 
 # Methanol reactor model
 def MethanolReactor(inlets, temperature, pressure):
@@ -100,16 +99,26 @@ def OMEReactor(inlets, temperature, pressure):
     n_total = np.sum(new_outlets)
     print('\n\n\n\nnew outlets:',new_outlets)
     print('Keq',Keq)
+    global OME_Keq
+    global OME_lastextent
+    global OME_ntotal
+    # set initial guess to validated IC if it is not already set
+    if not 'OME_lastextent' in globals():
+        OME_lastextent = np.array([5.51479, 4.17782, 3.35746, 2.12493, 1.19877, 0.5085])
+    OME_Keq = Keq
+    OME_ntotal = n_total
     # Solve for extent of reaction with basinhopping algorithm and BFGS
     # minimizer_kwargs = {"method": "BFGS",'args': (n_total, new_outlets, Keq)}
-    opt_result = minimize(OMERxnFunc, np.array([20,20,20,20,20,20], dtype=np.float64), (n_total, new_outlets, Keq), jac=lambda x: OMEJacobian(x, n_total, inlets, Keq), bounds=((0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total)))
+    opt_result = root(OMERxnFunc, OME_lastextent, (n_total, new_outlets, Keq), method='lm', jac=OMEJacobian) # , bounds=((0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total)))
     # basinhopping(OMERxnFunc, np.array([20,20,20,20,20,20], dtype=np.float64), niter=100,T=2,minimizer_kwargs=minimizer_kwargs, accept_test=OMEAccept)
     extent = opt_result['x']
-    print('extent',extent)
-    print('msg:',opt_result['message'])
+    OME_lastextent = extent
+    print('-'*100+'\n','new extent value:',extent)
+    print('old extent value:', OME_lastextent,'\n'+'-'*100)
+    print('\nmsg:',opt_result['message'])
     print('\n\nDID OME CONVERGE??')
     print('Should be zero:')
-    print(OMERxnFunc(extent, n_total, new_outlets, Keq))
+    print(np.sum(OMERxnFunc(extent, n_total, new_outlets, Keq)))
     # Calculate outlet flow rates of reacting species
     new_outlets[3] += extent[0]                # H2O
     new_outlets[4] -= 2*extent[0]              # MeOH
@@ -121,26 +130,36 @@ def OMEReactor(inlets, temperature, pressure):
     new_outlets[12] += extent[4] - extent[5]
     new_outlets[13] += extent[5]
     print('new outlets',new_outlets)
-    print('sumoldmoles',np.sum(inlets))
-    print('sumnewmoles',np.sum(new_outlets)+np.sum(extent))
+    if np.any(new_outlets < 0):
+        raise ValueError('the OME equilibrium converged to an invalid solution!!')
     return new_outlets
+
 # Helper function to specify nonlinear equations from EQ constants (Use flsove)
 def OMERxnFunc(extent_tup, n_tot, inlets, Keq):
     # Nomenclature: extents[0:5]~[A:F], Keq[0:5]~[A:F]
     extent = [extent_tup[0], extent_tup[1], extent_tup[2], extent_tup[3], extent_tup[4], extent_tup[5]]
     # adjust n_total
     n_total = n_tot - np.sum(extent)
+    FA = inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]
+    MEOH = inlets[4]-2*extent[0]
+    H2O = inlets[3]+extent[0]
+    OME1 = inlets[8]+extent[0]-extent[1]
+    OME2 = inlets[9]+extent[1]-extent[2]
+    OME3 = inlets[10]+extent[2]-extent[3]
+    OME4 = inlets[11]+extent[3]-extent[4]
+    OME5 = inlets[12]+extent[4]-extent[5]
+    OME6 = inlets[13]+extent[5]
     # calculate extents of reaction
     extent_calc = np.array([
-    ((inlets[8]+extent[0]-extent[1]) * (inlets[3]+extent[0]) * n_total) / ((inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]) * np.power(inlets[4]-2*extent[0],2))-Keq[0],
-    ((inlets[9]+extent[1]-extent[2]) * n_total) / ((inlets[8]+extent[0]-extent[1]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[1],
-    ((inlets[10]+extent[2]-extent[3]) * n_total) / ((inlets[9]+extent[1]-extent[2]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[2],
-    ((inlets[11]+extent[3]-extent[4]) * n_total) / ((inlets[10]+extent[2]-extent[3]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[3],
-    ((inlets[12]+extent[4]-extent[5]) * n_total) / ((inlets[11]+extent[3]-extent[4]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[4],
-    ((inlets[13]+extent[5]) * n_total) / ((inlets[12]+extent[4]-extent[5]) * (inlets[5]-extent[0]-extent[1]-extent[2]-extent[3]-extent[4]-extent[5]))-Keq[5]
+    (OME1 * H2O * n_total) / (FA * np.power(MEOH,2))-Keq[0],
+    (OME2 * n_total) / (OME1 * FA)-Keq[1],
+    (OME3 * n_total) / (OME2 * FA)-Keq[2],
+    (OME4 * n_total) / (OME3 * FA)-Keq[3],
+    (OME5 * n_total) / (OME4 * FA)-Keq[4],
+    (OME6 * n_total) / (OME5 * FA)-Keq[5]
     ])
     # return the mean squared error
-    return np.sum(np.power(extent_calc,2))
+    return extent_calc
 
 def OMEAccept(**kwargs):
     global OME_inflows
@@ -160,9 +179,15 @@ def OMEAccept(**kwargs):
         )
     return not rejected
 
-def OMEJacobian(extent, n_tot, inlets, Keq): # Pass in np.array of extents
-    x0, x1, x2, x3, x4, x5 = sp.symbols('x0,x1,x2,x3,x4,x5', real=True)
-    # adjust n_total
+def OMEJacobian(extent, n_total, new_outlets, Keq): # Pass in np.array of extents
+    x0, x1, x2, x3, x4, x5 = sympy.symbols('x0,x1,x2,x3,x4,x5', real=True)
+    # use global parameters from above
+    global OME_inflows
+    global OME_Keq
+    global OME_ntotal
+    inlets = OME_inflows
+    Keq = OME_Keq
+    n_tot = OME_ntotal
     n_total = n_tot - np.sum(extent)
 
     f1 = ((inlets[8]+x0-x1) * (inlets[3]+x0) * n_total) / ((inlets[5]-x0-x1-x2-x3-x4-x5) * np.power(inlets[4]-2*x0,2))-Keq[0]
@@ -173,8 +198,8 @@ def OMEJacobian(extent, n_tot, inlets, Keq): # Pass in np.array of extents
     f6 = ((inlets[13]+x5) * n_total) / ((inlets[12]+x4-x5) * (inlets[5]-x0-x1-x2-x3-x4-x5))-Keq[5]
 
     F = sympy.Matrix([f1,f2, f3, f4, f5, f6])
-    J = F.jacobian([x,y]).subs([(x0,extent[0]), (x1,extent[1]), (x2,extent[2]), (x3,extent[3]), (x4,extent[4]), (x5,extent[5])])
-
+    J = F.jacobian([x0,x1,x2,x3,x4,x5]).subs([(x0,extent[0]), (x1,extent[1]), (x2,extent[2]), (x3,extent[3]), (x4,extent[4]), (x5,extent[5])])
+    
     return np.array(J).astype(np.float64)
 
 
