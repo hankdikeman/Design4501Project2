@@ -8,8 +8,8 @@ from numpy.random import rand
 from scipy.optimize import newton, minimize, Bounds, fsolve, brute, differential_evolution, basinhopping
 import math
 from thermoutils import get_HRxn
-import simpy as sp
-from simpy import *
+import sympy as sp
+from sympy import jacobian
 
 # Methanol reactor model
 def MethanolReactor(inlets, temperature, pressure):
@@ -101,8 +101,9 @@ def OMEReactor(inlets, temperature, pressure):
     print('\n\n\n\nnew outlets:',new_outlets)
     print('Keq',Keq)
     # Solve for extent of reaction with basinhopping algorithm and BFGS
-    minimizer_kwargs = {"method": "BFGS",'args': (n_total, new_outlets, Keq)}
-    opt_result = basinhopping(OMERxnFunc, np.array([20,20,20,20,20,20], dtype=np.float64), niter=100,T=2,minimizer_kwargs=minimizer_kwargs, accept_test=OMEAccept)
+    # minimizer_kwargs = {"method": "BFGS",'args': (n_total, new_outlets, Keq)}
+    opt_result = minimize(OMERxnFunc, np.array([20,20,20,20,20,20], dtype=np.float64), (n_total, new_outlets, Keq), jac=lambda x: OMEJacobian(x, n_total, inlets, Keq), bounds=((0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total)))
+    # basinhopping(OMERxnFunc, np.array([20,20,20,20,20,20], dtype=np.float64), niter=100,T=2,minimizer_kwargs=minimizer_kwargs, accept_test=OMEAccept)
     extent = opt_result['x']
     print('extent',extent)
     print('msg:',opt_result['message'])
@@ -159,7 +160,7 @@ def OMEAccept(**kwargs):
         )
     return not rejected
 
-def OMEJacobiam(extent, n_tot, inlets, Keq): # Pass in np.array of extents
+def OMEJacobian(extent, n_tot, inlets, Keq): # Pass in np.array of extents
     x0, x1, x2, x3, x4, x5 = sp.symbols('x0,x1,x2,x3,x4,x5', real=True)
     # adjust n_total
     n_total = n_tot - np.sum(extent)
