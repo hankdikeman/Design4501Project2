@@ -33,10 +33,11 @@ class Component(metaclass=ABCMeta):
     def check_solution(self, next_inlets):
         # check all inlet flows to be the same within tolerance
         for inflow in self.inlets.keys():
-            print('inflow label:',inflow)
             previous = self.inlets[inflow]
             iterated = next_inlets[inflow]
-            if np.linalg.norm(previous - iterated) > 1E-2:
+            distance = np.linalg.norm(previous - iterated)/np.count_nonzero(previous)
+            print('inflow:',inflow,', lin alg dist =',distance)
+            if distance > 1E-2:
                 return False
         return True
 

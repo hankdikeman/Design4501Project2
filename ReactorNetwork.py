@@ -70,11 +70,12 @@ class Network:
             self.equilibrated = True
             for component in self.component_set:
                 if not self.component_set[component].is_fixed():
-                    print('Checked Component:',self.component_set[component])
-                    print(self.component_set[component].check_solution(next_inlets))
+                    print('Converged:',self.component_set[component].check_solution(next_inlets))
                     self.equilibrated &= self.component_set[component].check_solution(
                         next_inlets)
-            print(self.equilibrated)
+            print('\nSystem equilibrated:',self.equilibrated)
+            print('OME3-5 Output:',np.sum(list(self.component_set['ProductOutlet'].get_inlets().values())[0][10:13]),'moles')
+            print('\n'+'='*100+'\n')
             n_iter += 1
 
     def check_stream_coupling(self):
