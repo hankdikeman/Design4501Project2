@@ -45,8 +45,10 @@ def MethanolReactor(inlets, temperature, pressure):
     new_outlets[4] += extent[0]                # MeOH
     return new_outlets
 # Helper function to specicfy nonlinear equations from EQ constants (Use flsove)
-def MeOHRxnFunc(extent_tup, n_total, inlets, pressure, K1, K2):
+def MeOHRxnFunc(extent_tup, n_tot, inlets, pressure, K1, K2):
     extent = [extent_tup[0], extent_tup[1]]
+    # adjust n_total
+    n_total = n_tot - np.sum(extent)
     extent_calc = np.array([
     ((inlets[4]+extent[0])*(inlets[3]+extent[0]+extent[1])*n_total**2)/((inlets[1]-extent[0]-extent[1])*(inlets[0]-3*extent[0]-extent[1])**3)*(pressure/760)**(-2)-K1,
     ((inlets[2]+extent[1])*(inlets[3]+extent[0]+extent[1]))/((inlets[1]-extent[0]-extent[1])*(inlets[0]-3*extent[0]-extent[1]))-K2
