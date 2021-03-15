@@ -8,6 +8,8 @@ from numpy.random import rand
 from scipy.optimize import newton, minimize, Bounds, fsolve, brute, differential_evolution, basinhopping
 import math
 from thermoutils import get_HRxn
+import simpy as sp
+from simpy import *
 
 # Methanol reactor model
 def MethanolReactor(inlets, temperature, pressure):
@@ -156,6 +158,24 @@ def OMEAccept(**kwargs):
         ]) < 0
         )
     return not rejected
+
+def OMEJacobiam(extent, n_tot, inlets, Keq): # Pass in np.array of extents
+    x0, x1, x2, x3, x4, x5 = sp.symbols('x0,x1,x2,x3,x4,x5', real=True)
+    # adjust n_total
+    n_total = n_tot - np.sum(extent)
+
+    f1 = ((inlets[8]+x0-x1) * (inlets[3]+x0) * n_total) / ((inlets[5]-x0-x1-x2-x3-x4-x5) * np.power(inlets[4]-2*x0,2))-Keq[0]
+    f2 = ((inlets[9]+x1-x2) * n_total) / ((inlets[8]+x0-x1) * (inlets[5]-x0-x1-x2-x3-x4-x5))-Keq[1]
+    f3 = ((inlets[10]+x2-x3) * n_total) / ((inlets[9]+x1-x2) * (inlets[5]-x0-x1-x2-x3-x4-x5))-Keq[2]
+    f4 = ((inlets[11]+x3-x4) * n_total) / ((inlets[10]+x2-x3) * (inlets[5]-x0-x1-x2-x3-x4-x5))-Keq[3]
+    f5 = ((inlets[12]+x4-x5) * n_total) / ((inlets[11]+x3-x4) * (inlets[5]-x0-x1-x2-x3-x4-x5))-Keq[4]
+    f6 = ((inlets[13]+x5) * n_total) / ((inlets[12]+x4-x5) * (inlets[5]-x0-x1-x2-x3-x4-x5))-Keq[5]
+
+    F = sympy.Matrix([f1,f2, f3, f4, f5, f6])
+    J = F.jacobian([x,y]).subs([(x0,extent[0]), (x1,extent[1]), (x2,extent[2]), (x3,extent[3]), (x4,extent[4]), (x5,extent[5])])
+
+    return np.array(J).astype(np.float64)
+
 
 # labels = ['H2-0', 'CO2-1', 'CO-2', 'H2O-3', 'MEOH-4', 'FA-5', 'N2-6',
 #           'O2-7', 'OME1-8', 'OME2-9', 'OME3-10', 'OME4-11', 'OME5-12', 'OME6-13']
