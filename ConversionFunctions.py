@@ -36,7 +36,7 @@ def MethanolReactor(inlets, temperature, pressure):
     # Total moles in
     n_total = np.sum(new_outlets)
     # Solve for extent of reaction
-    opt_result = minimize(MeOHRxnFunc, (0.5, 0.5), (n_total, new_outlets, pressure, K1, K2))
+    opt_result = minimize(MeOHRxnFunc, (6.47*0.5, 6.47*0.5), (n_total, new_outlets, pressure, K1, K2))
     extent = opt_result['x']
     # Calculate outlet flow rates of reacting species
     new_outlets[0] -= (3*extent[0] + extent[1])  # H2
@@ -104,7 +104,7 @@ def OMEReactor(inlets, temperature, pressure):
     global OME_ntotal
     # set initial guess to validated IC if it is not already set
     if not 'OME_lastextent' in globals():
-        OME_lastextent = np.array([5.51479, 4.17782, 3.35746, 2.12493, 1.19877, 0.5085])
+        OME_lastextent = 6.47*np.array([5.51479, 4.17782, 3.35746, 2.12493, 1.19877, 0.5085])
     OME_Keq = Keq
     OME_ntotal = n_total
     # Solve for extent of reaction with basinhopping algorithm and BFGS

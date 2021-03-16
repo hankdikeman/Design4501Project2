@@ -125,7 +125,7 @@ if __name__ == "__main__":
     net1.add_component('R3', Reactor(TEMP_OME, PRESS_OME,
                                      r3inlets, r3outlets, OMEReactor))
     # OME column
-    DC2_recov = {'HK':(0.01,10),'LK':(0.99,9)}
+    DC2_recov = {'HK':(0.01,10),'LK':(0.999,9)}
     inletsdc2 = {'r31': StreamGen(MEOH=10, FA=18, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)}
     v_outdc2 = {'dc21': StreamGen()}
     l_outdc2 = {'dc22': StreamGen()}
