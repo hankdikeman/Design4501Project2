@@ -37,7 +37,7 @@ class Component(metaclass=ABCMeta):
             iterated = next_inlets[inflow]
             distance = np.linalg.norm(previous - iterated)/np.count_nonzero(previous)
             print('inflow:',inflow,', lin alg dist =',distance)
-            if distance > 1E-2:
+            if distance > 1E-4:
                 return False
         return True
 
