@@ -132,11 +132,26 @@ if __name__ == "__main__":
     DC2_TEMP = 353
     DC2_PRESS = 760 * 2
     net1.add_component('DC2', DistillationColumn(DC2_TEMP, DC2_PRESS, DC2_recov, inletsdc2, v_outdc2, l_outdc2))
+    # OME column 2
+    DC3_recov = {'HK':(0.01,13),'LK':(0.995,12)}
+    inletsdc3 = {'dc22': StreamGen(OME3=2, OME4=1, OME5=0.5, OME6=0.2)}
+    v_outdc3 = {'dc31': StreamGen()}
+    l_outdc3 = {'dc32': StreamGen()}
+    DC3_TEMP = 353
+    DC3_PRESS = 760 * 2
+    net1.add_component('DC3', DistillationColumn(DC3_TEMP, DC3_PRESS, DC3_recov, inletsdc3, v_outdc3, l_outdc3))
+    # OME + methanol mixer
+    mix5inlets = {
+        'm31': StreamGen(MEOH=10, FA=18, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1),
+        'dc32': StreamGen(OME6=0.1)
+    }
+    mix5outlets = {'m51': StreamGen()}
+    net1.add_component('M5', Mixer(mix5inlets, mix5outlets))
     # product outlet
-    productinlet  = {'dc22': StreamGen(OME3=5, OME4=5, OME5=5, OME6=5)}
+    productinlet  = {'dc31': StreamGen(OME3=5, OME4=5, OME5=5, OME6=5)}
     net1.add_component('ProductOutlet', ProductRemoval(productinlet))
     # water adsorber
-    ad_in = {'m31': StreamGen(MEOH=10, FA=18, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)}
+    ad_in = {'m51': StreamGen(MEOH=10, FA=18, H2O=0.1, OME1=0.1, OME2=0.1, OME3=0.1, OME4=0.1, OME5=0.1, OME6=0.1)}
     adwater_out = {'ad12': StreamGen()}
     adprod_out = {'ad11': StreamGen()}
     ad_recov = 1
