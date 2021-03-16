@@ -61,8 +61,9 @@ class Network:
         self.check_stream_coupling()
         # initialize count variable
         n_iter = 0
+        self.to_csv()
         # while the network is not marked as equilibrated
-        while not self.equilibrated and n_iter < 3000:
+        while not self.equilibrated and n_iter < 1700:
             print("Iteration ", n_iter)
             # call iteration function
             next_inlets = self.iterate_network()
@@ -77,6 +78,32 @@ class Network:
             print('OME3-5 Output:',np.sum(list(self.component_set['ProductOutlet'].get_inlets().values())[0][10:13]),'moles')
             print('\n'+'='*100+'\n')
             n_iter += 1
+
+
+    def to_csv(self):
+        cols = np.array(['Species: ', 'H2', 'CO2', 'CO', 'H2O', 'MEOH', 'FA', 'N2',
+                  'O2', 'OME1', 'OME2', 'OME3-', 'OME4', 'OME5', 'OME6'])
+        with open('/Users/patrickgibbons/Desktop/git/Design4501Project2/Report2Data/'+'MassTable'+'.csv', 'a+b') as f:
+            np.savetxt(f, cols, fmt = '%s', newline=',', delimiter = ',')
+            f.write(b"\n")
+        # loop through components and store inlets in dictionary
+        inlets = {}
+        for component in self.component_set.keys():
+            # merge current inlets dict
+            inlets = {**(self.component_set[component].get_inlets()), **inlets}
+
+        for k, v in inlets.items():
+            line = np.array([str(k)])
+            line = np.append(line, v, axis=0)
+            with open('/Users/patrickgibbons/Desktop/git/Design4501Project2/Report2Data/'+'MassTable'+'.csv', 'a+b') as f:
+                np.savetxt(f, line, fmt = '%s', newline=',', delimiter = ',')
+                f.write(b"\n")
+
+
+
+
+
+
 
     def check_stream_coupling(self):
         # check that every inlet has outlet and vice-versa
