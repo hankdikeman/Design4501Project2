@@ -48,12 +48,9 @@ class Network:
             if not self.component_set[component].is_fixed():
                 # get inlet streams of component
                 inlets = self.component_set[component].get_inlets()
-                print('component:',component,'\ninlets:')
-                pprint.pprint(inlets)
                 for inflow in (inlets.keys() & iterable_streams):
                     inlets[inflow] = np.array(inlets[inflow] + self.LEARNING_PARAM * \
                         (next_inlets[inflow] - inlets[inflow]))
-                    pprint.pprint(inlets[inflow])
         return next_inlets
 
     def equilibrate_network(self):
@@ -84,7 +81,7 @@ class Network:
     def to_csv(self):
         cols = np.array(['Species', 'H2', 'CO2', 'CO', 'H2O', 'MEOH', 'FA', 'N2',
                   'O2', 'OME1', 'OME2', 'OME3', 'OME4', 'OME5', 'OME6'])
-        with open('MolarFlowrates.csv', 'a+b') as f:
+        with open('Trashcan.csv', 'a+b') as f:
             np.savetxt(f, cols, fmt = '%s', newline=',', delimiter = ',')
             f.write(b"\n")
         # loop through components and store inlets in dictionary
@@ -96,7 +93,7 @@ class Network:
         for k, v in inlets.items():
             line = np.array([str(k)])
             line = np.append(line, v, axis=0)
-            with open('MolarFlowrates.csv', 'a+b') as f:
+            with open('Trashcan.csv', 'a+b') as f:
                 np.savetxt(f, line, fmt = '%s', newline=',', delimiter = ',')
                 f.write(b"\n")
 

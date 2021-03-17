@@ -29,8 +29,6 @@ def MethanolReactor(inlets, temperature, pressure):
 
     R = 8.314/1000 # kJ/(K*mol)
     # Kps Van't Hoff EQ
-    # K1 = math.exp(-1/R*(((Grxn1 - get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1))/298 + get_HRxn(react_ind1, react_coeff1, prod_ind1, prod_coeff1)/temperature)))
-    # K2 = math.exp(-1/R*(((Grxn2 - get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2))/298 + get_HRxn(react_ind2, react_coeff2, prod_ind2, prod_coeff2)/temperature)))
     K1 = math.exp(-Grxn1/(R*temperature))
     K2 = math.exp(-Grxn2/(R*temperature))
     # Total moles in
@@ -62,13 +60,11 @@ def FormaldehydeReactor(inlets, temperature, pressure):
     new_outlets = np.copy(inlets)
     # Kp with memo2 equation
     # Kp = np.power(10, ((-1.4722E-8)*temperature**3 + (5.2525E-5)*temperature**2 + (-6.889E-2)*temperature + 43))
-    # print("K val: ", Kp)
     # # Total moles in
     # n_total = np.sum(new_outlets)
     # Solve for extent of reaction
     # opt_result = minimize(FormRxnFunc, 5, (n_total, new_outlets, pressure, Kp))
     # extent = opt_result['x']
-    # print(opt_result)
     extent = new_outlets[4]
     # Calculate outlet flow rates of reacting species
     new_outlets[3] += extent       # H2O
@@ -97,8 +93,6 @@ def OMEReactor(inlets, temperature, pressure):
     Keq = np.append(Ka, Keq) # Double check correct syntax
     # Total moles in
     n_total = np.sum(new_outlets)
-    print('\n\n\n\nnew outlets:',new_outlets)
-    print('Keq',Keq)
     global OME_Keq
     global OME_lastextent
     global OME_ntotal
@@ -112,12 +106,6 @@ def OMEReactor(inlets, temperature, pressure):
     opt_result = root(OMERxnFunc, OME_lastextent, (n_total, new_outlets, Keq), method='lm', jac=OMEJacobian) # , bounds=((0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total),(0,n_total)))
     # basinhopping(OMERxnFunc, np.array([20,20,20,20,20,20], dtype=np.float64), niter=100,T=2,minimizer_kwargs=minimizer_kwargs, accept_test=OMEAccept)
     extent = opt_result['x']
-    print('-'*100+'\n','new extent value:',extent)
-    print('old extent value:', OME_lastextent,'\n'+'-'*100)
-    print('\nmsg:',opt_result['message'])
-    print('\n\nDID OME CONVERGE??')
-    print('Should be zero:')
-    print(np.sum(OMERxnFunc(extent, n_total, new_outlets, Keq)))
     # write new extent to global IC variable
     OME_lastextent = extent
     # Calculate outlet flow rates of reacting species
@@ -130,7 +118,6 @@ def OMEReactor(inlets, temperature, pressure):
     new_outlets[11] += extent[3] - extent[4]
     new_outlets[12] += extent[4] - extent[5]
     new_outlets[13] += extent[5]
-    print('new outlets',new_outlets)
     if np.any(new_outlets < 0):
         raise ValueError('the OME equilibrium converged to an invalid solution!!')
     return new_outlets

@@ -47,12 +47,12 @@ if __name__ == "__main__":
     f1inlets = {'r11': StreamGen(CO2=20, H2=60, MEOH=15, H2O=15, CO=5)}
     f1vaporoutlets = {'f11': StreamGen()}
     f1liquidoutlets = {'f12': StreamGen()}
-    f1recovery = {'Key': (0.0005, 4)}
-    F1PRESS = 760
+    f1recovery = {'Key': (0.70, 4)}
+    F1PRESS = 760*3
     net1.add_component('F1', FlashTank(F1PRESS, f1recovery,
                                        4, f1inlets, f1vaporoutlets, f1liquidoutlets))
     # distillation column for methanol
-    DC1_recov = {'HK':(0.01,3),'LK':(0.99,4)}
+    DC1_recov = {'HK':(0.001,3),'LK':(0.999,4)}
     inlets = {'f12': StreamGen(MEOH=15, H2O=15)}
     v_out = {'dc11': StreamGen()}
     l_out = {'dc12': StreamGen()}
